@@ -124,3 +124,29 @@ nb-configuration.xml
 
 /results/
 /phpunit*.xml
+
+
+# --- Abaikan file di dalam folder ---
+/attachment/*
+!/attachment/.gitkeep
+
+/employee_picture/*
+!/employee_picture/.gitkeep
+
+/inventory/*
+!/inventory/.gitkeep
+
+/kendaraan/*
+!/kendaraan/.gitkeep
+
+/logo_guest/*
+!/logo_guest/.gitkeep
+
+/tests/*
+!/tests/.gitkeep
+
+/uploads/*
+!/uploads/.gitkeep
+
+# --- Abaikan file .env ---
+.env
