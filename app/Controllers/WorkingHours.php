@@ -1,0 +1,106 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Controllers\BaseController;
+use CodeIgniter\HTTP\ResponseInterface;
+
+class WorkingHours extends BaseController
+{
+    public function index()
+    {
+        $data = [
+            'title'     => 'Working Hours',
+            'list_data' => $this->WorkingHoursModel->orderBy('id', 'DESC')->findAll()
+
+        ];
+
+        return view('working_hours/index', $data);
+    }
+
+    public function add()
+    {
+
+        $validation = \Config\Services::validation();
+        $data = [
+            'title'         => 'Add Working Hours',
+            'validation'    => $validation
+        ];
+        return view('working_hours/add', $data);
+    }
+
+    public function save()
+    {
+        if (!$this->validate([
+            'name'      => 'required|is_unique[working_hours.name]'
+        ])) {
+            return redirect()->to('working_hours/add')->withInput();
+        }
+
+        $slug = url_title($this->request->getVar('name'), '-', true);
+        $this->WorkingHoursModel->save([
+            'name'      => esc($this->request->getVar('name')),
+            'slug'      => $slug,
+            'entry_time' => $this->request->getVar('entry_time'),
+            'clock_out' => $this->request->getVar('clock_out'),
+            'start_scan_in' => $this->request->getVar('start_scan_in'),
+            'end_scan_in' => $this->request->getVar('end_scan_in'),
+            'start_scan_out' => $this->request->getVar('start_scan_out'),
+            'end_scan_out' => $this->request->getVar('end_scan_out')
+        ]);
+
+        return redirect()->to(base_url('working_hours'))->with('success', 'data <strong>saved</strong> successfully');
+    }
+
+    public function edit($slug)
+    {
+        $validation =
+            $data = [
+                'title'     => 'Edit Working Hours',
+                'list_data' => $this->WorkingHoursModel->where(['slug' => $slug])->first(),
+                'validation'    => \Config\Services::validation()
+            ];
+
+
+        return view('working_hours/edit', $data);
+    }
+
+    public function update($id)
+    {
+        $slug = $this->request->getVar('slug');
+        $old_data = $this->WorkingHoursModel->where(['slug' => $slug])->first();
+
+        if ($old_data->name == $this->request->getVar('name')) {
+            $rule_name = 'required';
+        } else {
+            $rule_name = 'required|is_unique[working_hours.name]';
+        }
+
+        if (!$this->validate([
+            'name'      => $rule_name
+        ])) {
+            return redirect()->to('working_hours/edit/' . $slug)->withInput();
+        }
+
+        $newslug = url_title($this->request->getVar('name'), '-', true);
+        $this->WorkingHoursModel->save([
+            'id'        => $id,
+            'name'      => esc($this->request->getVar('name')),
+            'slug'      => $newslug,
+            'entry_time' => $this->request->getVar('entry_time'),
+            'clock_out' => $this->request->getVar('clock_out'),
+            'start_scan_in' => $this->request->getVar('start_scan_in'),
+            'end_scan_in' => $this->request->getVar('end_scan_in'),
+            'start_scan_out' => $this->request->getVar('start_scan_out'),
+            'end_scan_out' => $this->request->getVar('end_scan_out')
+        ]);
+
+        return redirect()->to(base_url('working_hours'))->with('success', 'data <strong>updated</strong> successfully');
+    }
+
+    public function delete($id)
+    {
+        $this->WorkingHoursModel->delete($id);
+        return redirect()->to(base_url('working_hours'))->with('success', 'data <strong>deleted</strong> successfully');
+    }
+}
