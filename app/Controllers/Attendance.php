@@ -1294,11 +1294,15 @@ class Attendance extends BaseController
             ->join('division d', 'd.id = e.division_id', 'left')
             ->join('plant p', 'p.id = e.plant_id', 'left')
             ->join('employee_group eg', 'eg.id = e.employee_group_id', 'left')
-            ->whereIn('e.employee_status_id', [1, 2])
-            ->where('e.division_id', $division_id);
+            ->whereIn('e.employee_status_id', [1, 2]);
+            
 
         if (!empty($plant_id)) {
             $employeeBuilder->where('e.plant_id', $plant_id);
+        }
+
+        if(!empty($division_id)) {
+            $employeeBuilder->where('e.division_id', $division_id);
         }
 
         if (!empty($employee_group_id)) {
@@ -1306,6 +1310,7 @@ class Attendance extends BaseController
         }
 
         $employeesRaw = $employeeBuilder->findAll();
+
 
         $employees = [];
         foreach ($employeesRaw as $row) {
@@ -1517,6 +1522,7 @@ class Attendance extends BaseController
         $division_id = $this->request->getPost('division_id');
         $plant_id    = $this->request->getPost('plant_id');
         $employee_group_id = $this->request->getPost('employee_group_id');
+
 
         return redirect()->to(
             base_url('attendance/reportmonthlydepartment') .

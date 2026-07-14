@@ -915,7 +915,7 @@ END AS durasi_telat
     }
 
     //baru report departemen
-    public function getAttendanceRaw($start_date, $end_date, $division_id, $plant_id = null, $employee_group_id = null)
+    public function getAttendanceRaw($start_date, $end_date, $division_id = null, $plant_id = null, $employee_group_id = null)
     {
         $builder = $this->db->table('attendance a');
 
@@ -964,7 +964,10 @@ END AS durasi_telat
         $builder->where('a.date <=', $end_date);
 
         $builder->whereIn('e.employee_status_id', [1, 2]);
-        $builder->where('e.division_id', $division_id);
+        
+        if (!empty($division_id)) {
+            $builder->where('e.division_id', $division_id);
+        }
 
         if (!empty($plant_id)) {
             $builder->where('e.plant_id', $plant_id);

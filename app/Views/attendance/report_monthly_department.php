@@ -72,6 +72,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Division</label>
                                     <select name="division_id" class="form-control select2">
+                                        <option value="">-- All --</option>
                                         <?php foreach ($division as $row): ?>
                                             <option value="<?= $row->id ?>" <?= ($row->id == $division_id) ? 'selected' : '' ?>>
                                                 <?= $row->name ?>
@@ -130,7 +131,7 @@
                     <div class="alert alert-light py-2 mb-3">
                         <strong>Periode:</strong> <?= esc($periode_label) ?>
                     </div>
-                    <form action="<?= base_url('attendance/export_report_monthly_department'); ?>" method="post" class="d-inline">
+                    <!-- <form action="<?= base_url('attendance/export_report_monthly_department'); ?>" method="post" class="d-inline">
                         <?= csrf_field(); ?>
 
                         <input type="hidden" name="start_date" value="<?= esc($start_date) ?>">
@@ -142,9 +143,12 @@
                         <button type="submit" class="btn btn-success">
                             <i class="mdi mdi-file-excel"></i> Export Excel
                         </button>
-                    </form>
+                    </form> -->
+                    <button onclick="exportTableToExcel('tabelAttendance', 'Report_Attendance')" class="btn btn-success">
+                        <i class="mdi mdi-file-excel"></i> Export to Excel
+                    </button>
                     <div class="filter-scroll">
-                        <table class="table table-bordered nowrap">
+                        <table id="tabelAttendance" class="table table-bordered nowrap">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -198,7 +202,7 @@
                                         $totalJam   = floor($totalOvertimeMinutes / 60);
                                         $totalMenit = $totalOvertimeMinutes % 60;
 
-                                        $totalOT = $totalJam . '.' . str_pad($totalMenit, 2, '0', STR_PAD_LEFT);
+                                        $totalOT = $totalJam . ' Jam ' . str_pad($totalMenit, 2, '0', STR_PAD_LEFT).' Menit';
                                         ?>
                                         <td rowspan="2"><?= $totalOT ?></td>
                                     </tr>
@@ -211,7 +215,12 @@
                                             ?>
 
                                             <td colspan="2" class="text-center text-danger fw-bold">
-                                                <?= $ot != '0.00' ? $ot : '-' ?>
+                                                <?php if ($ot != '0.00'): ?>
+                                                    <?php [$jam, $menit] = explode('.', $ot); ?>
+                                                    <?= $jam ?> Jam <?= str_pad($menit, 2, '0', STR_PAD_LEFT) ?> Menit
+                                                <?php else: ?>
+                                                    -
+                                                <?php endif; ?>
                                             </td>
                                         <?php endforeach; ?>
                                     </tr>
@@ -225,5 +234,42 @@
         </div>
     </div>
 </div>
+
+
+<script>
+function exportTableToExcel(tableID, filename = '') {
+    var tableSelect = document.getElementById(tableID);
+    
+    // Trik CSS untuk border tipis (standard Excel look)
+    var style = "<style>" +
+                "table { border-collapse: collapse; width: 100%; }" +
+                "th, td { border: 0.5pt solid #000000; padding: 5px; }" +
+                "th { background-color: #efefef; font-weight: bold; }" +
+                "</style>";
+
+    // Struktur XML untuk Excel agar tidak dianggap corrupt
+    var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+                   'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
+                   'xmlns="http://www.w3.org/TR/REC-html40">' +
+                   '<head>' + style + '</head>' +
+                   '<body>' + tableSelect.outerHTML + '</body></html>';
+
+    var blob = new Blob(['\ufeff', template], { type: 'application/vnd.ms-excel' });
+    
+    var filename = filename ? filename + '.xls' : 'Report_Attendance.xls';
+    
+    var downloadLink = document.createElement("a");
+    document.body.appendChild(downloadLink);
+    
+    if (navigator.msSaveOrOpenBlob) {
+        navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = filename;
+        downloadLink.click();
+    }
+    document.body.removeChild(downloadLink);
+}
+</script>
 <!-- container -->
 <?= $this->endSection() ?>
