@@ -1263,10 +1263,12 @@ class Attendance extends BaseController
         $start_date = $this->request->getGet('start_date') ?: date('Y-m-25', strtotime('-1 month'));
         $end_date   = $this->request->getGet('end_date') ?: date('Y-m-24');
 
-        $division_id = resolveDivisionFilter($this->request->getGet('division_id'));
         $plant_id = $this->request->getGet('plant_id');
         $employee_group_id = $this->request->getGet('employee_group_id');
-
+        
+        // $division_id = resolveDivisionFilter($this->request->getGet('division_id'));
+        $input_division = $this->request->getGet('division_id');
+        $division_id = empty($input_division) ? 1 : resolveDivisionFilter($input_division);
         /**
          * =========================================================
          * DIVISION
