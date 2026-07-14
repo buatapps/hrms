@@ -17,7 +17,7 @@
         "codeigniter4/framework": "^4.0",
         "dompdf/dompdf": "^3.1",
         "myth/auth": "^1.2",
-        "phpoffice/phpspreadsheet": "^4.2",
+        "phpoffice/phpspreadsheet": "^5.9",
         "phpoffice/phpword": "^1.4"
     },
     "require-dev": {
