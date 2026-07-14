@@ -390,6 +390,7 @@ $routes->get('contract/delete_employee/(:num)/(:num)', 'Contract::delete_employe
 $routes->get('contract/print/(:num)', 'Contract::print/$1');
 
 //routes overtime
+$routes->get('overtimes/testEmail', 'Overtimes::testEmail');
 $routes->get('overtime', 'Overtime::index');
 $routes->post('overtime/search', 'Overtime::search');
 $routes->get('overtime/add', 'Overtime::add');

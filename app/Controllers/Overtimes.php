@@ -464,15 +464,48 @@ class Overtimes extends BaseController
         $row = $this->OvertimesModel
             ->where('overtimes.id', $id)
             ->first();
-        if ($row->current_approval_level == '1') {
-            $level = 'Head Division';
-        } else if ($row->current_approval_level == '2') {
-            $level = 'Manager';
-        } else {
-            $level = "";
-        }
+        if (!$row) return redirect()->back()->with('error', 'Data tidak ditemukan');
 
-        return redirect()->to('/overtimes')->with('success', 'Send Mail to <strong>' . $level . '</strong> Successfully');
+        $targetGroupId = ($row->current_approval_level == '1') ? 7 : 8;
+        $levelName = ($row->current_approval_level == '1') ? 'assisten-manager' : 'senior-manager';
+        
+        $db = \Config\Database::connect();
+        $targetUsers = $db->table('users u')
+        ->select('u.email, u.username')
+        ->join('auth_groups_users agu', 'agu.user_id = u.id')
+        ->where('u.division_id', $row->division_id) // Asumsi user punya kolom division_id
+        ->where('agu.group_id', $targetGroupId)
+        ->get()
+        ->getResult();
+
+        $emailService = \Config\Services::email();
+
+        foreach ($targetUsers as $user) {
+        $emailService->setTo($user->email);
+        $emailService->setSubject('New Overtime Approval Request');
+
+        // Template Email
+        $message = "
+            <h3>Halo, " . $user->username . "</h3>
+            <p>Ada pengajuan lembur baru yang memerlukan persetujuan Anda.</p>
+            <p>Silakan klik link di bawah ini untuk melihat detail pengajuan:</p>
+            <p><a href='" . base_url('overtimes/details/' . $id) . "' style='padding: 10px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;'>Lihat Detail Lembur</a></p>
+            <br>
+            <p>Terima kasih.</p>
+        ";
+
+        $emailService->setMessage($message);
+
+        // Kirim email
+        if ($emailService->send()) {
+            // Berhasil
+        } else {
+            // Log error jika perlu
+            $data = $emailService->printDebugger(['headers']);
+        }
+    }
+
+        return redirect()->to('/overtimes')->with('success', 'Email berhasil dikirim ke ' . count($targetUsers) . ' ' . $levelName . '(s)');
     }
 
     public function print($id)
@@ -510,6 +543,27 @@ class Overtimes extends BaseController
 
         return redirect()->to('/overtimes/details/' . $id)->with('success', 'Overtime cancelled successfully');
     }
+
+public function testEmail()
+{
+    $email = \Config\Services::email();
+
+        // Ganti dengan email tujuan uji coba kamu
+        $to = 'alathiefpermana@gmail.com'; 
+        
+        $email->setTo($to);
+        $email->setSubject('Testing Kirim Email CodeIgniter 4');
+        $email->setMessage('<h1>Halo!</h1><p>Email ini dikirim otomatis menggunakan SMTP Gmail dari CodeIgniter 4 kamu.</p>');
+
+        if ($email->send()) {
+            echo "<h3>Hore! Email berhasil dikirim ke $to.</h3>";
+        } else {
+            echo "<h3>Yach, email gagal dikirim!</h3>";
+            // Ini akan menampilkan log error untuk memudahkan debugging
+            $data = $email->printDebugger(['headers', 'subject', 'body']);
+            echo '<pre>' . print_r($data, true) . '</pre>';
+        }
+}
 
 }
 
