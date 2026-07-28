@@ -535,6 +535,7 @@ class Employee extends BaseController
         //History
         $absent_type = $this->AbsentTypeModel->findAll();
         $locker_history = $this->LockerHistoryModel->DataLockerHistory();
+        $contracts = $this->ContractModel->getContractsByEmployee($id);
 
         $data = [
             'title'     => 'Details Employee',
@@ -568,7 +569,8 @@ class Employee extends BaseController
             'attendance' => $attendance,
             'files' => $files,
             'absent_type' => $absent_type,
-            'locker_history' => $locker_history
+            'locker_history' => $locker_history,
+            'contracts' => $contracts
         ];
 
         return view('employee/details_japan', $data);

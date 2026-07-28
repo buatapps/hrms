@@ -126,6 +126,18 @@ class ContractModel extends Model
             ->countAllResults() > 0;
     }
 
+    public function getContractsByEmployee($employee_id)
+    {
+        $builder = $this->db->table('contract');
+        $builder->select('contract.*, contract_types.name as contract_type_name, contract_statuses.code as status_name, contract_statuses.class as status_class, division.name as division_name');
+        $builder->join('contract_types', 'contract_types.id = contract.contract_types_id');
+        $builder->join('contract_statuses', 'contract_statuses.id = contract.contract_statuses_id');
+        $builder->join('division', 'division.id = contract.division_id');
+        $builder->where('contract.employee_id', $employee_id);
+        $builder->where('contract.deleted_at', null);
+        $builder->orderBy('contract.start_date', 'DESC');
+        return $builder->get()->getResultObject();
+    }
 
     // public function ContractEmployee($id)
     // {

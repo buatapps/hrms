@@ -710,97 +710,154 @@
                                     Reimbursement/Cash Advance/Loan
                                 </div>
                                 <div class="tab-pane" id="history">
-                                    <div class="mb-5">
-                                        <h4>History Absent</h4>
-                                        <div class="mb-3">
+                                    <h3 class="fst-italic mb-3">History data</h3>
+                                    <div class="tab-content">
 
-                                            <div class="row g-2">
+                                        <ul class="nav nav-pills bg-nav-pills nav-justified mb-3">
+                                            <li class="nav-item">
+                                                <a href="#history_contract" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
+                                                    <i class="mdi mdi-file-document d-md-none d-block"></i>
+                                                    <span class="d-none d-md-block">CONTRACT</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#history_absent" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                                                    <i class="mdi mdi-history d-md-none d-block"></i>
+                                                    <span class="d-none d-md-block">HISTORY ABSENT</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#history_locker" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                                                    <i class="mdi mdi-lock d-md-none d-block"></i>
+                                                    <span class="d-none d-md-block">HISTORY LOCKER</span>
+                                                </a>
+                                            </li>
+                                        </ul>
 
-                                                <!-- Absent Type -->
-                                                <div class="col-md-3">
-                                                    <select id="filter_absent_type" class="form-control">
-                                                        <option value="all">All Type</option>
-                                                        <?php foreach ($absent_type as $type): ?>
-                                                            <option value="<?= $type->id ?>">
-                                                                <?= $type->name ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
+                                        <div class="tab-content">
+                                            <div class="tab-pane active" id="history_contract">
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <table class="table table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>No</th>
+                                                                    <th>Contract Type</th>
+                                                                    <th>Division</th>
+                                                                    <th>Salary</th>
+                                                                    <th>Start Date</th>
+                                                                    <th>End Date</th>
+                                                                    <th>Status</th>
+                                                                    <th>Created At</th>
+                                                                    <th class="text-center">Print</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php if (!empty($contracts)) : ?>
+                                                                    <?php $no = 1; ?>
+                                                                    <?php foreach ($contracts as $c) : ?>
+                                                                        <tr>
+                                                                            <td><?= $no++; ?></td>
+                                                                            <td><?= $c->contract_type_name; ?></td>
+                                                                            <td><?= $c->division_name; ?></td>
+                                                                            <td><?= 'Rp ' . number_format($c->salary, 0, ',', '.'); ?></td>
+                                                                            <td><?= date('d-M-Y', strtotime($c->start_date)); ?></td>
+                                                                            <td><?= date('d-M-Y', strtotime($c->end_date)); ?></td>
+                                                                            <td><span class="text-<?= $c->status_class; ?>"><?= $c->status_name; ?></span></td>
+                                                                            <td><?= date('d/m/Y H:i:s', strtotime($c->created_at)); ?></td>
+                                                                            <td class="text-center">
+                                                                                <a href="<?= base_url('contract/print/' . $c->id); ?>" class="action-icon text-primary" target="_blank"><i class="mdi mdi-printer"></i></a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php endforeach; ?>
+                                                                <?php else : ?>
+                                                                    <tr>
+                                                                        <td colspan="9" class="text-center">No contract data available</td>
+                                                                    </tr>
+                                                                <?php endif; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
-
-                                                <!-- Period -->
-                                                <div class="col-md-3">
-                                                    <select id="filter_period" class="form-control">
-                                                        <option value="this_month">This Month</option>
-                                                        <option value="last_3_month">Last 3 Months</option>
-                                                        <option value="last_6_month">Last 6 Months</option>
-                                                        <option value="this_year">This Year</option>
-                                                        <option value="custom">Custom</option>
-                                                    </select>
-                                                </div>
-
-                                                <!-- Start Date -->
-                                                <div class="col-md-3" id="box_start_date" style="display:none;">
-                                                    <input type="date" id="start_date" class="form-control">
-                                                </div>
-
-                                                <!-- End Date -->
-                                                <div class="col-md-3" id="box_end_date" style="display:none;">
-                                                    <input type="date" id="end_date" class="form-control">
-                                                </div>
-
-                                                <!-- Button (optional nanti) -->
-                                                <!-- <div class="col-md-12 mt-2">
-                                                <button class="btn btn-primary btn-sm" id="btn_filter_history">
-                                                    Filter
-                                                </button>
-                                            </div> -->
-
                                             </div>
 
-                                        </div>
-                                        <div class="row gx-0">
-                                            <div id="history_period_label" class="mb-2 fw-bold"></div>
+                                            <div class="tab-pane" id="history_absent">
+                                                <div class="mb-3">
+                                                    <div class="row g-2">
+                                                        <!-- Absent Type -->
+                                                        <div class="col-md-3">
+                                                            <select id="filter_absent_type" class="form-control">
+                                                                <option value="all">All Type</option>
+                                                                <?php foreach ($absent_type as $type): ?>
+                                                                    <option value="<?= $type->id ?>">
+                                                                        <?= $type->name ?>
+                                                                    </option>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        </div>
 
-                                            <div id="history_rows" class="row"></div>
+                                                        <!-- Period -->
+                                                        <div class="col-md-3">
+                                                            <select id="filter_period" class="form-control">
+                                                                <option value="this_month">This Month</option>
+                                                                <option value="last_3_month">Last 3 Months</option>
+                                                                <option value="last_6_month">Last 6 Months</option>
+                                                                <option value="this_year">This Year</option>
+                                                                <option value="custom">Custom</option>
+                                                            </select>
+                                                        </div>
 
-                                            <hr>
+                                                        <!-- Start Date -->
+                                                        <div class="col-md-3" id="box_start_date" style="display:none;">
+                                                            <input type="date" id="start_date" class="form-control">
+                                                        </div>
 
-                                            <div id="history_summary"></div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-5">
-                                        <h4>History Locker</h4>
-                                        <div class="col-12">
-                                            <div class="row">
-                                                <table class="table table-striped">
+                                                        <!-- End Date -->
+                                                        <div class="col-md-3" id="box_end_date" style="display:none;">
+                                                            <input type="date" id="end_date" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row gx-0">
+                                                    <div id="history_period_label" class="mb-2 fw-bold"></div>
+                                                    <div id="history_rows" class="row"></div>
+                                                    <hr>
+                                                    <div id="history_summary"></div>
+                                                </div>
+                                            </div>
 
-                                                    <head>
-                                                        <tr>
-                                                            <th>Date</th>
-                                                            <th>Locker</th>
-                                                            <th>Key Number</th>
-                                                            <th>Event</th>
-                                                            <th>Remark</th>
-                                                            <th>Created At</th>
-                                                        </tr>
-                                                    </head>
-
-                                                    <body>
-                                                        <?php foreach ($locker_history as $lh) { ?>
-                                                            <tr>
-                                                                <td><?= $lh->transaction_date; ?></td>
-                                                                <td><?= $lh->locker_code; ?></td>
-                                                                <td><?= $lh->key_number; ?></td>
-                                                                <td><?= $lh->event; ?></td>
-                                                                <td><?= $lh->remark; ?></td>
-                                                                <td><?= $lh->created_at; ?></td>
-                                                            </tr>
-                                                        <?php } ?>
-                                                    </body>
-                                                </table>
+                                            <div class="tab-pane" id="history_locker">
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <table class="table table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Date</th>
+                                                                    <th>Locker</th>
+                                                                    <th>Key Number</th>
+                                                                    <th>Event</th>
+                                                                    <th>Remark</th>
+                                                                    <th>Created At</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php foreach ($locker_history as $lh) { ?>
+                                                                    <tr>
+                                                                        <td><?= $lh->transaction_date; ?></td>
+                                                                        <td><?= $lh->locker_code; ?></td>
+                                                                        <td><?= $lh->key_number; ?></td>
+                                                                        <td><?= $lh->event; ?></td>
+                                                                        <td><?= $lh->remark; ?></td>
+                                                                        <td><?= $lh->created_at; ?></td>
+                                                                    </tr>
+                                                                <?php } ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
+
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="files">
