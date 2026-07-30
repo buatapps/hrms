@@ -315,6 +315,9 @@
                         <li>
                             <a href="<?= base_url('general_affairs/stiker_kendaraan'); ?>">QR Stiker Kendaraan</a>
                         </li>
+                        <li>
+                            <a href="<?= base_url('general_affairs/sertifikat'); ?>">Sertifikat</a>
+                        </li>
                         <li class="side-nav-item">
                             <a data-bs-toggle="collapse" href="#sidebarLocker" aria-expanded="false" aria-controls="sidebarLocker">
                                 <span> Locker Management</span>

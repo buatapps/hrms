@@ -114,6 +114,9 @@
                         <li>
                             <a href="<?= base_url('general_affairs/stiker_kendaraan'); ?>">QR Stiker Kendaraan</a>
                         </li>
+                        <li>
+                            <a href="<?= base_url('general_affairs/sertifikat'); ?>">Sertifikat</a>
+                        </li>
                     </ul>
                 </div>
             </li>

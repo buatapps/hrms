@@ -84,6 +84,18 @@ $routes->get('general_affairs/stikerPrintAll/(:num)', 'GeneralAffairs::stikerPri
 $routes->post('general_affairs/search_stiker', 'GeneralAffairs::search_stiker');
 $routes->post('general_affairs/print_checked', 'GeneralAffairs::print_checked');
 
+$routes->get('general_affairs/sertifikat', 'Sertifikat::index');
+$routes->get('general_affairs/sertifikat_add', 'Sertifikat::add');
+$routes->post('general_affairs/sertifikat_save', 'Sertifikat::save');
+$routes->get('general_affairs/sertifikat_edit/(:segment)', 'Sertifikat::edit/$1');
+$routes->post('general_affairs/sertifikat_update/(:segment)', 'Sertifikat::update/$1');
+$routes->get('general_affairs/sertifikat_delete/(:num)', 'Sertifikat::delete/$1');
+
+$routes->post('general_affairs/tipe_sertifikat_save', 'Sertifikat::tipeSertifikatSave');
+$routes->post('general_affairs/tipe_sertifikat_update', 'Sertifikat::tipeSertifikatUpdate');
+$routes->get('general_affairs/tipe_sertifikat_delete/(:num)', 'Sertifikat::tipeSertifikatDelete/$1');
+$routes->get('general_affairs/tipe_sertifikat_list', 'Sertifikat::tipeSertifikatList');
+
 //routes account
 $routes->get('account', 'Account::index');
 $routes->get('account/edit/(:segment)', 'Account::edit/$1');

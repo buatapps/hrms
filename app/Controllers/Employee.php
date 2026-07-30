@@ -536,6 +536,13 @@ class Employee extends BaseController
         $absent_type = $this->AbsentTypeModel->findAll();
         $locker_history = $this->LockerHistoryModel->DataLockerHistory();
         $contracts = $this->ContractModel->getContractsByEmployee($id);
+        $sertifikat = $this->SertifikatModel->db->table('sertifikat')
+            ->select('sertifikat.*, tipe_sertifikat.tipe_sertifikat')
+            ->join('tipe_sertifikat', 'tipe_sertifikat.id = sertifikat.tipe_sertifikat_id')
+            ->where('sertifikat.employee_id', $id)
+            ->where('sertifikat.deleted_at', null)
+            ->orderBy('sertifikat.id', 'DESC')
+            ->get()->getResultObject();
 
         $data = [
             'title'     => 'Details Employee',
@@ -570,7 +577,8 @@ class Employee extends BaseController
             'files' => $files,
             'absent_type' => $absent_type,
             'locker_history' => $locker_history,
-            'contracts' => $contracts
+            'contracts' => $contracts,
+            'sertifikat' => $sertifikat
         ];
 
         return view('employee/details_japan', $data);

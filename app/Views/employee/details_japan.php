@@ -721,6 +721,12 @@
                                                 </a>
                                             </li>
                                             <li class="nav-item">
+                                                <a href="#history_sertifikat" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                                                    <i class="mdi mdi-certificate d-md-none d-block"></i>
+                                                    <span class="d-none d-md-block">SERTIFIKAT</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
                                                 <a href="#history_absent" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
                                                     <i class="mdi mdi-history d-md-none d-block"></i>
                                                     <span class="d-none d-md-block">HISTORY ABSENT</span>
@@ -773,6 +779,46 @@
                                                                 <?php else : ?>
                                                                     <tr>
                                                                         <td colspan="9" class="text-center">No contract data available</td>
+                                                                    </tr>
+                                                                <?php endif; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="tab-pane" id="history_sertifikat">
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <table class="table table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>No</th>
+                                                                    <th>Tipe Sertifikat</th>
+                                                                    <th>Masa Berlaku</th>
+                                                                    <th>File</th>
+                                                                    <th>Created At</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php if (!empty($sertifikat)) : ?>
+                                                                    <?php $no = 1; ?>
+                                                                    <?php foreach ($sertifikat as $s) : ?>
+                                                                        <tr>
+                                                                            <td><?= $no++; ?></td>
+                                                                            <td><?= $s->tipe_sertifikat; ?></td>
+                                                                            <td><?= date('d/m/Y', strtotime($s->masa_berlaku)); ?></td>
+                                                                            <td>
+                                                                                <?php if ($s->file): ?>
+                                                                                    <a href="<?= base_url('sertifikat/' . $s->file); ?>" target="_blank" class="btn btn-warning btn-sm"><span class="mdi mdi-file"></span></a>
+                                                                                <?php endif; ?>
+                                                                            </td>
+                                                                            <td><?= date('d/m/Y H:i:s', strtotime($s->created_at)); ?></td>
+                                                                        </tr>
+                                                                    <?php endforeach; ?>
+                                                                <?php else : ?>
+                                                                    <tr>
+                                                                        <td colspan="5" class="text-center">No sertifikat data available</td>
                                                                     </tr>
                                                                 <?php endif; ?>
                                                             </tbody>
