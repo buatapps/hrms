@@ -52,6 +52,7 @@ class StnkModel extends Model
         $builder = $this->db->table('stnk');
         $builder->select('*, stnk.id as id');
         $builder->join('data_employee', 'data_employee.id = stnk.employee_id');
+        $this->addSimMasaBerlaku($builder);
         if ($division_id != 0) {
             $builder->where('division_id', $division_id);
         }
@@ -77,6 +78,7 @@ class StnkModel extends Model
         $builder = $this->db->table('stnk');
         $builder->select('*, stnk.id as id');
         $builder->join('data_employee', 'data_employee.id = stnk.employee_id');
+        $this->addSimMasaBerlaku($builder);
         $builder->where('employee_status_id !=', 3);
         $builder->where('stnk.deleted_at', null);
         $builder->where('stnk.id', $id);
@@ -89,10 +91,25 @@ class StnkModel extends Model
         $builder = $this->db->table('stnk');
         $builder->select('*, stnk.id as id');
         $builder->join('data_employee', 'data_employee.id = stnk.employee_id');
+        $this->addSimMasaBerlaku($builder);
+        $builder->where('employee_status_id !=', 3);
         $builder->where('stnk.deleted_at', null);
         $builder->whereIn('stnk.id', $id);
         $query = $builder->get();
         return $query->getResultArray();
+    }
+
+    protected function addSimMasaBerlaku($builder)
+    {
+        $simSub = $this->db->table('sim')
+            ->select('masa_berlaku')
+            ->where('sim.employee_id = data_employee.id')
+            ->where('sim.deleted_at', null)
+            ->orderBy('masa_berlaku', 'ASC')
+            ->limit(1);
+        $builder->selectSubquery($simSub, 'sim_masa_berlaku');
+
+        return $builder;
     }
 
     public function dataPajakExpired($date)

@@ -6,191 +6,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Stiker Kendaraan</title>
     <script>
-        window.print();
+        window.addEventListener('load', function() {
+            window.print();
+        });
     </script>
     <style>
-        @media print {
-            body {
-                height: auto !important;
-                min-height: auto !important;
-                margin: 1cm;
-                background: white !important;
-            }
+        @page {
+            size: 80mm 40mm;
+            margin: 0;
+        }
 
-            .badge-page {
-                page-break-after: always;
-            }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            align-items: flex-start;
-            margin: 10px;
             background: #fff;
-        }
-
-        .circle-outer {
-            position: relative;
-            width: 7cm;
-            height: 7cm;
-            border: 0.2cm solid #0c0000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px;
-            box-sizing: border-box;
-        }
-
-        .circle-middle {
-            width: calc(7cm - 2 * 0.2cm);
-            height: calc(7cm - 2 * 0.2cm);
-            border: 0.2cm solid #61e3e5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .circle-inner {
-            position: relative;
-            width: calc(7cm - 4 * 0.2cm + 0.18cm);
-            height: calc(7cm - 4 * 0.2cm + 0.18cm);
-            border: 0.18cm solid #3db1fa;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .circle-white {
-            position: relative;
-            width: calc(7cm - 4 * 0.2cm - 2 * 0.18cm);
-            height: calc(7cm - 4 * 0.2cm - 2 * 0.18cm);
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: visible;
-        }
-
-        .circle-white svg {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        text {
-            fill: #163B65;
-            font-size: 6.5pt;
             font-family: Arial, sans-serif;
-            font-weight: bold;
         }
 
-        /* Setengah lingkaran biru */
-        .half-circle-blue {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 60%;
-            background: #38B6FF;
-            border-bottom-left-radius: 70% 100%;
-            border-bottom-right-radius: 70% 100%;
-            clip-path: polygon(0 40%, 100% 40%, 100% 80%, 0 80%);
-            z-index: 10;
+        @media print {
+            body {
+                margin: 0;
+                background: white !important;
+            }
 
+            #debug-icon,
+            #debug-bar,
+            #toolbar_js {
+                display: none !important;
+            }
+        }
+
+        .label {
+            position: relative;
+            width: 79mm;
+            height: 38.5mm;
+            border: 1mm solid #000;
+            border-radius: 2mm;
+            overflow: hidden;
+            padding-left: 2px;
+            margin-top: 1mm;
+            page-break-inside: avoid;
+            page-break-after: always;
+        }
+
+        .label:last-child {
+            page-break-after: auto;
+        }
+
+        .label-left {
+            position: absolute;
+            top: 3mm;
+            bottom: 3mm;
+            left: calc(3mm + 2px);
+            right: 40mm;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-family: Arial, sans-serif;
+        }
+
+        .namicoh {
+            font-size: 11pt;
             font-weight: bold;
-            padding-top: 20px;
-            user-select: none;
+            letter-spacing: 2pt;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            box-sizing: border-box;
+            line-height: 1;
+            color: #000;
         }
 
-        .half-circle-blue .namicoh {
-            /* font-size: 9pt; */
-            font-size: 24pt;
-            /* padding-top: 5px; */
-            line-height: 1;
+        .safety-riding {
+            font-size: 4.5pt;
+            line-height: 1.4;
+            margin-top: 0.8mm;
+            color: #000;
+        }
+
+        .divider {
+            border-top: 0.4mm solid #000;
+            margin: 1.2mm 0;
+        }
+
+        .info-row {
+            font-size: 5pt;
+            line-height: 1.4;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .info-row .lbl {
             font-weight: bold;
         }
 
-        .half-circle-blue .safety-riding {
-            font-size: 10pt;
-            padding-top: 2px;
-            line-height: 1;
+        .info-row .val {
+            font-weight: normal;
         }
 
-        .plate-text {
-            position: absolute;
-            bottom: 5px;
-            width: 100%;
+        .spacer {
+            flex: 1;
+        }
+
+        .plate-band {
+            background: #000;
+            color: #fff;
+            font-size: 10pt;
+            font-weight: bold;
+            letter-spacing: 2pt;
             text-align: center;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            font-size: 10pt;
-            color: #163B65;
-            user-select: none;
+            padding: 1.2mm 0;
+            border-radius: 1mm;
         }
 
-        .qr-code {
+        .qr-img {
             position: absolute;
-            bottom: 35%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: auto;
+            top: calc(1mm + 5px);
+            right: calc(1mm + 5px);
+            width: 33mm;
+            height: 33mm;
         }
     </style>
 </head>
 
 <body>
-    <?php
-    $counter = 0;
-    foreach ($employees as $emp):
-        if ($counter % 6 == 0 && $counter != 0): ?>
-            <div class="badge-page" style="page-break-after: always;"></div>
-        <?php endif; ?>
-        <div class="circle-outer">
-            <div class="circle-middle">
-                <div class="circle-inner">
-                    <div class="circle-white">
-                        <svg viewBox="0 0 100 100">
-                            <defs>
-                                <path id="textPath" d="M8,48 A38,38 0 0,1 92,48" />
-                            </defs>
-                            <text>
-                                <textPath href="#textPath" startOffset="50%" text-anchor="middle">
-                                    ALWAYS SAFE DRIVE
-                                </textPath>
-                            </text>
-                        </svg>
+    <?php if (empty($employees)): ?>
+        <p style="font-family: Arial, sans-serif; margin: 20px;">Tidak ada data untuk dicetak.</p>
+    <?php endif; ?>
 
-                        <div class="half-circle-blue">
-                            <div class="namicoh">NAMICOH</div>
-                            <div class="safety-riding">Safety Riding</div>
-                        </div>
-
-
-                        <img src="<?= render_qrcode($emp['employee_id'] . '.' . $emp['name'] . '.' . $emp['division'] . '.' . $emp['nomor_plat']); ?>" alt="QR Code" class="qr-code" />
-
-                        <div class="plate-text"><?= esc($emp['nomor_plat']) ?></div>
-                    </div>
-                </div>
+    <?php foreach ($employees as $emp): ?>
+        <div class="label">
+            <div class="label-left">
+                <div class="namicoh">Namicoh</div>
+                <div class="safety-riding">Safety Riding</div>
+                <div class="divider"></div>
+                <div class="info-row"><span class="lbl">Nama : </span><span class="val"><?= esc($emp['name']); ?></span></div>
+                <div class="info-row"><span class="lbl">NIK : </span><span class="val"><?= esc($emp['employee_id']); ?></span></div>
+                <div class="info-row"><span class="lbl">Kend : </span><span class="val"><?= esc($emp['kendaraan'] . ' ' . $emp['brand'] . ' ' . $emp['tipe_kendaraan']); ?></span></div>
+                <div class="info-row"><span class="lbl">STNK Berlaku : </span><span class="val"><?= esc($emp['masa_berlaku_pajak']); ?></span></div>
+                <div class="info-row"><span class="lbl">Plat Berlaku : </span><span class="val"><?= esc($emp['masa_berlaku_plat']); ?></span></div>
+                <div class="info-row"><span class="lbl">SIM Berlaku : </span><span class="val"><?= esc($emp['sim_masa_berlaku']); ?></span></div>
+                <div class="divider"></div>
+                <div class="spacer"></div>
+                <div class="plate-band"><?= esc($emp['nomor_plat']); ?></div>
             </div>
+            <img src="<?= render_qrcode(json_encode([
+                'employee_id'        => $emp['employee_id'],
+                'name'               => $emp['name'],
+                'division'           => $emp['division'],
+                'nomor_plat'         => $emp['nomor_plat'],
+                'masa_berlaku_pajak' => $emp['masa_berlaku_pajak'],
+                'masa_berlaku_plat'  => $emp['masa_berlaku_plat'],
+                'sim_masa_berlaku'   => $emp['sim_masa_berlaku'],
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); ?>" alt="QR Code" class="qr-img" />
         </div>
-    <?php
-        $counter++;
-    endforeach; ?>
+    <?php endforeach; ?>
 </body>
 
 </html>
