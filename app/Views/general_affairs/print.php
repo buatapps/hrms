@@ -61,7 +61,7 @@
             top: 0;
             bottom: 0;
             left: 50%;
-            border-left: 0.4mm solid #000;
+            border-left: 1mm solid #000;
         }
 
         .label-left {
