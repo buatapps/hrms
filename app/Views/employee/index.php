@@ -89,7 +89,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-xl-1 col-sm-12">
+                                    <div class="col-xl-2 col-sm-12">
                                         <div class="d-grid">
                                             <button type="submit" class="btn btn-info"><i class="mdi mdi-magnify"></i> Search</button>
                                         </div>
@@ -121,6 +121,12 @@
                             </form>
 
                         </div><!-- end col-->
+                        <div class="col-xl-2 col-sm-12 ms-xl-auto">
+                            <h5>&nbsp;</h5>
+                            <div class="d-grid">
+                                <a href="<?= base_url('employee/non-aktif'); ?>" class="btn btn-danger"><i class="mdi mdi-account-off"></i> Employee Non-active</a>
+                            </div>
+                        </div>
                         <div id="loading" style="display: none; margin-top: 1rem;">
                             <i class="mdi mdi-loading mdi-spin" style="font-size: 24px;"></i>
                             <span style="margin-left: 0.5rem;">Sedang menyiapkan file...</span>

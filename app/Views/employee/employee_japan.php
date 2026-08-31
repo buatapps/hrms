@@ -92,12 +92,13 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-xl-1 col-sm-12">
+                                    <div class="col-xl-2 col-sm-12">
                                         <div class="d-grid">
                                             <button type="submit" class="btn btn-info"><i class="mdi mdi-magnify"></i> Search</button>
                                         </div>
                                     </div>
                                 </div>
+
                             </form>
                         </div>
 

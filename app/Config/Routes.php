@@ -104,6 +104,7 @@ $routes->get('account/delete/(:num)', 'Account::delete/$1');
 
 //routes Employee
 $routes->get('employee', 'Employee::index');
+$routes->get('employee/non-aktif', 'Employee::nonAktif');
 $routes->get('employee/add', 'Employee::add');
 $routes->post('employee/save', 'Employee::save');
 $routes->get('employee/edit/(:segment)', 'Employee::edit/$1');

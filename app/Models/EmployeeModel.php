@@ -29,6 +29,31 @@ class EmployeeModel extends Model
         }
     }
 
+    public function dataEmployeeNonActive($division_id = null)
+    {
+        $builder = $this->db->table('data_employee e');
+        $builder->select('e.*, c.contract_types_id AS latest_contract_type_id, ct.name AS latest_contract_types_name');
+        $builder->where('e.employee_status_id', 3);
+
+        if ($division_id !== null) {
+            $builder->where('e.division_id', $division_id);
+        }
+
+        $subQuery = $this->db->table('contract c1')
+            ->select('c1.id, c1.employee_id, c1.contract_types_id')
+            ->join(
+                '(SELECT employee_id, MAX(end_date) AS max_end FROM contract WHERE deleted_at IS NULL GROUP BY employee_id) c2',
+                'c1.employee_id = c2.employee_id AND c1.end_date = c2.max_end',
+                'inner'
+            )
+            ->where('c1.deleted_at', null);
+
+        $builder->join('(' . $subQuery->getCompiledSelect() . ') c', 'e.id = c.employee_id', 'left');
+        $builder->join('contract_types ct', 'ct.id = c.contract_types_id', 'left');
+
+        return $builder->get()->getResultObject();
+    }
+
     public function dataEmployeeIndex($division_id = null)
     {
         $builder = $this->db->table('data_employee e');

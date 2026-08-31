@@ -11,6 +11,16 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Employee extends BaseController
 {
+    public function nonAktif()
+    {
+        $division_id = resolveDivisionFilter($this->request->getVar('division_id'));
+
+        return view('employee/non-aktif', [
+            'title' => 'Employee Non-active',
+            'list_data' => $this->EmployeeModel->dataEmployeeNonActive($division_id)
+        ]);
+    }
+
     public function index()
     {
         $division_id = resolveDivisionFilter($this->request->getVar('division_id'));
@@ -326,6 +336,11 @@ class Employee extends BaseController
     public function edit($id)
     {
         $list_data = $this->EmployeeModel->where(['id' => $id])->first();
+
+        if ($list_data === null) {
+            return redirect()->to(base_url('employee'))->with('error', 'Data employee tidak ditemukan');
+        }
+
         $company = $this->CompanyModel->findAll();
         $division = $this->DivisionModel->findAll();
         $position = $this->PositionModel->findAll();
