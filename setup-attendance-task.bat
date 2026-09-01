@@ -23,6 +23,7 @@ if not "%errorlevel%"=="0" (
 )
 
 set "PROJECT=%~dp0"
+for %%I in ("%PROJECT%.") do set "SPROJECT=%%~sI\"
 
 if not exist "%PROJECT%spark" (
     echo [ERROR] File 'spark' tidak ditemukan di: %PROJECT%
@@ -55,10 +56,10 @@ echo.
 echo Membuat task jadwal otomatis download absensi...
 echo.
 
-schtasks /Create /TN "HRMS Attendance 08:15" /SC DAILY /ST 08:15 /RU SYSTEM /F /TR "\"%PROJECT%setup-attendance-task.bat\" run"
+schtasks /Create /TN "HRMS Attendance 08:15" /SC DAILY /ST 08:15 /RU SYSTEM /F /TR "\"%SPROJECT%setup-attendance-task.bat\" run"
 if errorlevel 1 ( echo [X] Gagal membuat task 08:15 ) else ( echo [OK] Task 08:15 dibuat )
 
-schtasks /Create /TN "HRMS Attendance 20:30" /SC DAILY /ST 20:30 /RU SYSTEM /F /TR "\"%PROJECT%setup-attendance-task.bat\" run"
+schtasks /Create /TN "HRMS Attendance 20:30" /SC DAILY /ST 20:30 /RU SYSTEM /F /TR "\"%SPROJECT%setup-attendance-task.bat\" run"
 if errorlevel 1 ( echo [X] Gagal membuat task 20:30 ) else ( echo [OK] Task 20:30 dibuat )
 
 echo.
@@ -89,6 +90,7 @@ goto :done
 REM --------------- MODE RUN: eksekusi otomatis ------------------
 :run
 set "PROJECT=%~dp0"
+for %%I in ("%PROJECT%.") do set "SPROJECT=%%~sI\"
 
 REM Deteksi PHP: pakai XAMPP bila ada, kalau tidak cek PATH
 set "PHP=C:\xampp\php\php.exe"
@@ -111,7 +113,7 @@ if exist "%PROJECT%writable\notif_email.cfg" (
     set /p EMAIL=<"%PROJECT%writable\notif_email.cfg"
 )
 if not "%EMAIL%"=="" set "EMAIL=email=%EMAIL%"
-"%PHP%" "%PROJECT%spark" attendance:download %EMAIL% >> "%PROJECT%writable\logs\attendance_download.log" 2>&1
+"%PHP%" "%SPROJECT%spark" attendance:download %EMAIL% >> "%PROJECT%writable\logs\attendance_download.log" 2>&1
 exit /b %errorlevel%
 
 :done
