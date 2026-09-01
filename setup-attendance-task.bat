@@ -25,14 +25,7 @@ if not "%errorlevel%"=="0" (
 set "PROJECT=%~dp0"
 for %%I in ("%PROJECT%.") do set "SPROJECT=%%~sI\"
 if "%SPROJECT%"=="" set "SPROJECT=%PROJECT%"
-
-if not exist "%PROJECT%spark" (
-    echo [ERROR] File 'spark' tidak ditemukan di: %PROJECT%
-    echo Tempatkan file ini di root project ^(satu folder dengan 'spark'^).
-    echo.
-    pause
-    exit /b 1
-)
+echo [versi batch: 2 - shortpath fallback aktif]
 
 REM Pastikan folder log ada
 if not exist "%PROJECT%writable\logs" mkdir "%PROJECT%writable\logs"
@@ -57,27 +50,23 @@ echo.
 echo Membuat task jadwal otomatis download absensi...
 echo.
 
-REM Coba dengan SYSTEM dulu (jalan tanpa login), fallback ke user saat ini jika ditolak.
-set "TR=\"%SPROJECT%setup-attendance-task.bat\" run"
-schtasks /Create /TN "HRMS Attendance 08:15" /SC DAILY /ST 08:15 /RU SYSTEM /F /TR "%TR%"
-if errorlevel 1 (
-    echo [i] SYSTEM ditolak, coba sebagai user %USERNAME% ...
-    schtasks /Create /TN "HRMS Attendance 08:15" /SC DAILY /ST 08:15 /RU "%USERNAME%" /RL HIGHEST /F /TR "%TR%"
+REM Deteksi PHP (jalur untuk memulai task)
+set "PHP=C:\xampp\php\php.exe"
+if not exist "%PHP%" (
+    set "PHP="
+    for /f "delims=" %%i in ('where php 2^>nul') do set "PHP=%%i"
 )
-if errorlevel 1 ( echo [X] Gagal membuat task 08:15 ) else ( echo [OK] Task 08:15 dibuat )
 
-schtasks /Create /TN "HRMS Attendance 20:30" /SC DAILY /ST 20:30 /RU SYSTEM /F /TR "%TR%"
-if errorlevel 1 (
-    echo [i] SYSTEM ditolak, coba sebagai user %USERNAME% ...
-    schtasks /Create /TN "HRMS Attendance 20:30" /SC DAILY /ST 20:30 /RU "%USERNAME%" /RL HIGHEST /F /TR "%TR%"
+if "%PHP%"=="" (
+    echo [ERROR] PHP tidak ditemukan. Sesuaikan baris "set PHP=..." di awal blok install.
+    pause
+    exit /b 1
 )
-if errorlevel 1 ( echo [X] Gagal membuat task 20:30 ) else ( echo [OK] Task 20:30 dibuat )
 
-echo.
-echo ================== VERIFIKASI ==================
-schtasks /Query /TN "HRMS Attendance 08:15" /FO LIST
-echo.
-schtasks /Query /TN "HRMS Attendance 20:30" /FO LIST
+echo Menggunakan PHP: %PHP%
+echo Email notifikasi: %EMAIL%
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT%create-hrms-tasks.ps1" -Project "%PROJECT%" -Php "%PHP%" -Email "%EMAIL%"
 
 echo.
 set /p RUNTEST=Jalankan sekarang untuk tes? (Y/N): 
@@ -86,8 +75,8 @@ if /i not "%RUNTEST%"=="Y" goto :done
 echo.
 echo Menjalankan task 'HRMS Attendance 08:15' ...
 schtasks /Run /TN "HRMS Attendance 08:15"
-echo Menunggu 25 detik biar proses selesai, lalu lihat log...
-timeout /t 25 /nobreak >nul
+echo Menunggu 30 detik biar proses selesai, lalu lihat log...
+timeout /t 30 /nobreak >nul
 
 echo.
 echo ================== ISI LOG ==================
