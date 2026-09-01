@@ -42,6 +42,9 @@ $routes->get('welcome_board/active/(:segment)', 'WelcomeBoard::active/$1');
 $routes->get('welcome_board/non_active/(:segment)', 'WelcomeBoard::non_active/$1');
 $routes->get('welcome_board/view', 'WelcomeBoard::view');
 
+//routes welcome board video
+$routes->get('welcome_board_video', 'WelcomeBoardVideo::index');
+
 //count food
 $routes->get('count_food', 'CountFood::index');
 $routes->post('count_food/generate', 'CountFood::generate');

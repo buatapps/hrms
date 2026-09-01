@@ -104,6 +104,9 @@
                         <li>
                             <a href="<?= base_url('guest'); ?>">Guest</a>
                         </li>
+                        <li>
+                            <a href="<?= base_url('welcome_board_video'); ?>" target="_blank">Welcome Board Video</a>
+                        </li>
                     </ul>
                 </div>
             </li>
