@@ -1,10 +1,28 @@
 ﻿param(
     [Parameter(Mandatory=$true)][string]$Project,
-    [Parameter(Mandatory=$true)][string]$Php,
+    [string]$Php,
     [string]$Email
 )
 
-Write-Host "[versi ps1: 1 - ScheduledTask object]"
+Write-Host "[versi ps1: 2 - PHP auto-detect]"
+
+if ([string]::IsNullOrWhiteSpace($Php)) {
+    $candidates = @("C:\xampp\php\php.exe")
+    $Php = $null
+    foreach ($c in $candidates) {
+        if (Test-Path -LiteralPath $c) { $Php = $c; break }
+    }
+    if (-not $Php) {
+        $cmd = Get-Command php -ErrorAction SilentlyContinue
+        if ($cmd) { $Php = $cmd.Source }
+    }
+    if (-not $Php) {
+        Write-Host "[X] PHP tidak ditemukan. Berikan -Php <path>."
+        exit 1
+    }
+}
+Write-Host "Menggunakan PHP: $Php"
+Write-Host "Email notifikasi: $Email"
 
 $php    = $Php
 $spark  = Join-Path $Project 'spark'

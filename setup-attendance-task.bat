@@ -50,22 +50,7 @@ echo.
 echo Membuat task jadwal otomatis download absensi...
 echo.
 
-REM Deteksi PHP (jalur untuk memulai task)
-set "PHP=C:\xampp\php\php.exe"
-if not exist "%PHP%" (
-    set "PHP="
-    for /f "delims=" %%i in ('where php 2^>nul') do set "PHP=%%i"
-)
-
-if "%PHP%"=="" (
-    echo [ERROR] PHP tidak ditemukan. Sesuaikan baris "set PHP=..." di awal blok install.
-    pause
-    exit /b 1
-)
-
-echo Menggunakan PHP: %PHP%
-echo Email notifikasi: %EMAIL%
-
+REM Jalur PHP diserahkan ke ps1 (auto-detect). Diteruskan apa adanya.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT%create-hrms-tasks.ps1" -Project "%PROJECT%" -Php "%PHP%" -Email "%EMAIL%"
 
 echo.
