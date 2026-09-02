@@ -25,12 +25,41 @@ class Digiman extends BaseController
     public function index()
     {
         $data = [
-            'title'     => 'Digiman',
-            'istirahat' => $this->JamIstirahatModel->orderBy('hari_istirahat', 'ASC')->findAll(),
-            'videos'    => $this->DigimanVideoModel->orderBy('id', 'DESC')->findAll()
+            'title'              => 'Digiman',
+            'istirahat'          => $this->JamIstirahatModel->orderBy('hari_istirahat', 'ASC')->findAll(),
+            'videos'             => $this->DigimanVideoModel->orderBy('id', 'DESC')->findAll(),
+            'maxUploadSize'      => $this->maxUploadSize('human'),
+            'maxUploadSizeBytes' => $this->maxUploadSize('bytes')
         ];
 
         return view('digiman/index', $data);
+    }
+
+    private function maxUploadSize($mode)
+    {
+        $toBytes = function ($value) {
+            $value = trim($value);
+            $unit  = strtolower($value[strlen($value) - 1]);
+            $size  = (int) $value;
+            switch ($unit) {
+                case 'g': $size *= 1024 * 1024 * 1024; break;
+                case 'm': $size *= 1024 * 1024; break;
+                case 'k': $size *= 1024; break;
+            }
+            return $size;
+        };
+
+        $bytes = min(
+            $toBytes(ini_get('upload_max_filesize') ?: '2M'),
+            $toBytes(ini_get('post_max_size') ?: '8M')
+        );
+
+        if ($mode === 'human') {
+            if ($bytes >= 1024 * 1024 * 1024) return round($bytes / (1024 * 1024 * 1024), 1) . ' GB';
+            return round($bytes / (1024 * 1024), 0) . ' MB';
+        }
+
+        return $bytes;
     }
 
     public function board()

@@ -253,8 +253,9 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">File Video</label>
-                        <input type="file" class="form-control" name="video_file" accept="video/*" required>
-                        <div class="mt-2 form-text">Video akan disimpan di folder <code>assets/video/</code></div>
+                        <input type="file" class="form-control" name="video_file" accept="video/*"
+                               data-upload-form="video-add" required>
+                        <div class="mt-2 form-text">Video akan disimpan di folder <code>assets/video/</code>. Maksimal ukuran <strong><?= $maxUploadSize ?></strong>.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Status</label>
@@ -289,7 +290,8 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">File Video</label>
-                            <input type="file" class="form-control" name="video_file" accept="video/*">
+                            <input type="file" class="form-control" name="video_file" accept="video/*"
+                                   data-upload-form="video-edit">
                             <div class="mt-1 form-text">Kosongkan jika tidak ingin mengganti file. File saat ini: <code><?= $row->video; ?></code></div>
                         </div>
                         <div class="mb-3">
@@ -350,5 +352,26 @@
             }
         });
     }
+
+    var MAX_VIDEO_SIZE = <?= $maxUploadSizeBytes ?>; // bytes
+
+    $('form[enctype="multipart/form-data"]').on('submit', function(e) {
+        var input = $(this).find('input[type="file"]')[0];
+        if (!input || !input.files.length) return true; // tidak ada file baru (mode edit)
+
+        var file = input.files[0];
+        if (file.size > MAX_VIDEO_SIZE) {
+            e.preventDefault();
+            var mb = (file.size / (1024 * 1024)).toFixed(1);
+            Swal.fire({
+                title: 'File Terlalu Besar!',
+                text: 'Ukuran file ' + mb + ' MB melebihi batas maksimal <?= $maxUploadSize ?>.',
+                icon: 'error',
+                confirmButtonColor: '#d33'
+            });
+            return false;
+        }
+        return true;
+    });
 </script>
 <?= $this->endSection() ?>
