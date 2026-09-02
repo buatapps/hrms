@@ -81,6 +81,8 @@ use App\Models\OvertimeApprovalsModel;
 use App\Models\OvertimeApprovalModel;
 use App\Models\SertifikatModel;
 use App\Models\TipeSertifikatModel;
+use App\Models\JamIstirahatModel;
+use App\Models\DigimanVideoModel;
 
 
 /**
@@ -120,7 +122,7 @@ abstract class BaseController extends Controller
     /**
      * @return void
      */
-    protected $DashboardModel, $GuestModel, $CompanyModel, $UserModel, $SectionModel, $PositionModel, $EmployeeModel, $EducationModel, $EmployeeStatusModel, $GenderModel, $ReligionModel, $MarriageStatusModel, $BankModel, $UniformSizeModel, $ShoesSizeModel, $WelcomeBoardModel, $DivisionModel, $PlantModel, $EmployeeGroupModel, $TaxStatusModel, $DependentModel, $BloodTypeModel, $ProductSynchronizationModel, $AttendanceMachineModel, $AttendanceModel, $ShiftModel, $WorkingHoursModel, $WorkingDaysModel, $EmployeeScheduleModel, $EmployeeLateModel, $CountFoodModel, $AbsentTypeModel, $StnkModel, $SimModel, $ContractModel, $AbsentModel, $OvertimeModel, $TicketModel, $TicketStatusModel, $TicketCategoryModel, $HardwareModel, $HardwareCategoryModel, $HardwareBrandModel, $SoftwareModel, $NetworkModel, $ResignModel, $OvertimeHeaderModel, $OvertimeDetailModel, $InventoryCategoryModel, $InventoryItemsModel, $InventoryTransactionsInModel, $InventorySnapshotModel, $InventoryTransactionOutTypeModel, $InventoryTransactionsOutModel, $InventoryStockOpnameHeaderModel, $InventoryStockOpnameModel, $AuthGroupsModel, $ContractTypesModel, $ContractStatusesModel, $EmployeeUploadsModel, $LogHistoryModel, $LogHistoryAbsentModel, $LockerModel, $LockerHistoryModel, $OvertimesModel, $OvertimeItemsModel, $OvertimeCategoriesModel, $OvertimeApprovalsModel, $OvertimeApprovalModel, $SertifikatModel, $TipeSertifikatModel;
+    protected $DashboardModel, $GuestModel, $CompanyModel, $UserModel, $SectionModel, $PositionModel, $EmployeeModel, $EducationModel, $EmployeeStatusModel, $GenderModel, $ReligionModel, $MarriageStatusModel, $BankModel, $UniformSizeModel, $ShoesSizeModel, $WelcomeBoardModel, $DivisionModel, $PlantModel, $EmployeeGroupModel, $TaxStatusModel, $DependentModel, $BloodTypeModel, $ProductSynchronizationModel, $AttendanceMachineModel, $AttendanceModel, $ShiftModel, $WorkingHoursModel, $WorkingDaysModel, $EmployeeScheduleModel, $EmployeeLateModel, $CountFoodModel, $AbsentTypeModel, $StnkModel, $SimModel, $ContractModel, $AbsentModel, $OvertimeModel, $TicketModel, $TicketStatusModel, $TicketCategoryModel, $HardwareModel, $HardwareCategoryModel, $HardwareBrandModel, $SoftwareModel, $NetworkModel, $ResignModel, $OvertimeHeaderModel, $OvertimeDetailModel, $InventoryCategoryModel, $InventoryItemsModel, $InventoryTransactionsInModel, $InventorySnapshotModel, $InventoryTransactionOutTypeModel, $InventoryTransactionsOutModel, $InventoryStockOpnameHeaderModel, $InventoryStockOpnameModel, $AuthGroupsModel, $ContractTypesModel, $ContractStatusesModel, $EmployeeUploadsModel, $LogHistoryModel, $LogHistoryAbsentModel, $LockerModel, $LockerHistoryModel, $OvertimesModel, $OvertimeItemsModel, $OvertimeCategoriesModel, $OvertimeApprovalsModel, $OvertimeApprovalModel, $SertifikatModel, $TipeSertifikatModel, $JamIstirahatModel, $DigimanVideoModel;
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         // Do Not Edit This Line
@@ -201,5 +203,7 @@ abstract class BaseController extends Controller
         $this->OvertimeApprovalModel = new OvertimeApprovalModel();
         $this->SertifikatModel = new SertifikatModel();
         $this->TipeSertifikatModel = new TipeSertifikatModel();
+        $this->JamIstirahatModel = new JamIstirahatModel();
+        $this->DigimanVideoModel = new DigimanVideoModel();
     }
 }

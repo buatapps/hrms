@@ -32,12 +32,25 @@ class WelcomeBoardVideo extends BaseController
      */
     public $footerCompany = 'PT.Namicoh Indonesia Component';
 
+    /**
+     * Pemetaan nama hari PHP (date('l')) ke nama hari Indonesia.
+     */
+    private $dayMap = [
+        'Sunday'    => 'Minggu',
+        'Monday'    => 'Senin',
+        'Tuesday'   => 'Selasa',
+        'Wednesday' => 'Rabu',
+        'Thursday'  => 'Kamis',
+        'Friday'    => 'Jumat',
+        'Saturday'  => 'Sabtu'
+    ];
+
     public function index()
     {
         $data = [
             'title'         => 'Welcome Board Video',
-            'videos'        => $this->scanVideos(),
-            'breakSchedule' => $this->breakSchedule,
+            'videos'        => $this->activeVideos(),
+            'breakSchedule' => $this->todayBreakSchedule(),
             'showLogo'      => $this->showLogo,
             'logoPath'      => $this->logoPath,
             'footerBrand'   => $this->footerBrand,
@@ -47,25 +60,34 @@ class WelcomeBoardVideo extends BaseController
         return view('welcome_board_video/view', $data);
     }
 
-    private function scanVideos()
+    /**
+     * Ambil daftar video berstatus aktif dari database.
+     */
+    private function activeVideos()
     {
-        $allowed = ['mp4', 'webm', 'mov', 'mkv', 'ogg'];
-        $folder  = FCPATH . 'assets/video/';
-        $videos  = [];
-
-        if (!is_dir($folder)) {
-            return $videos;
+        $rows   = $this->DigimanVideoModel->where('status', 'aktif')->findAll();
+        $videos = [];
+        foreach ($rows as $row) {
+            $videos[] = $row->video;
         }
-
-        $files = scandir($folder);
-        foreach ($files as $file) {
-            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-            if (in_array($ext, $allowed)) {
-                $videos[] = $file;
-            }
-        }
-
-        sort($videos);
         return $videos;
+    }
+
+    /**
+     * Ambil jadwal istirahat untuk hari ini (hari aktual).
+     */
+    private function todayBreakSchedule()
+    {
+        $phpDay  = date('l');
+        $hari    = isset($this->dayMap[$phpDay]) ? $this->dayMap[$phpDay] : $phpDay;
+
+        $rows = $this->JamIstirahatModel->where('hari_istirahat', $hari)->orderBy('jam_istirahat', 'ASC')->findAll();
+
+        $schedule = [];
+        foreach ($rows as $row) {
+            $schedule[] = date('H:i', strtotime($row->jam_istirahat));
+        }
+
+        return $schedule;
     }
 }

@@ -111,6 +111,13 @@
                 </div>
             </li>
 
+            <li class="side-nav-item">
+                <a href="<?= base_url('digiman'); ?>" class="side-nav-link">
+                    <i class="uil-monitor"></i>
+                    <span> Digiman </span>
+                </a>
+            </li>
+
             <li class="side-nav-title">Apps</li>
 
             <li class="side-nav-item">

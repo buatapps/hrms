@@ -45,6 +45,14 @@ $routes->get('welcome_board/view', 'WelcomeBoard::view');
 //routes welcome board video
 $routes->get('welcome_board_video', 'WelcomeBoardVideo::index');
 
+//routes digiman
+$routes->get('digiman', 'Digiman::index');
+$routes->get('digiman/board', 'Digiman::board');
+$routes->post('digiman/save_istirahat', 'Digiman::save_istirahat');
+$routes->post('digiman/delete_istirahat/(:num)', 'Digiman::delete_istirahat/$1');
+$routes->post('digiman/save_video', 'Digiman::save_video');
+$routes->post('digiman/delete_video/(:num)', 'Digiman::delete_video/$1');
+
 //count food
 $routes->get('count_food', 'CountFood::index');
 $routes->post('count_food/generate', 'CountFood::generate');
