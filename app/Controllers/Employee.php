@@ -1318,13 +1318,19 @@ class Employee extends BaseController
         $plant_id = $this->request->getVar('plant_id');
         $employee_group_id = $this->request->getVar('employee_group_id');
 
+        //simpan log history plant group
+        $oldData = $this->EmployeeModel->asArray()->find($employee_id);
+
+        // Validasi: cek apakah employee ditemukan
+        if (!$oldData) {
+            return redirect()->to(base_url('employee/employee_division/' . $division_id))
+                ->with('error', 'Employee not found');
+        }
+
         $data = [
             'plant_id' => $plant_id,
             'employee_group_id' => $employee_group_id
         ];
-
-        //simpan log history plant group
-        $oldData = $this->EmployeeModel->asArray()->find($employee_id);
 
         $newData = [
             'plant_id' => $plant_id,
@@ -1342,6 +1348,11 @@ class Employee extends BaseController
 
     private function logPlantGroup($employee_id, $oldData, $newData)
     {
+        // Validasi: jika $oldData null, skip logging
+        if (!$oldData || !is_array($oldData)) {
+            return;
+        }
+
         if (
             $oldData['plant_id'] == $newData['plant_id'] &&
             $oldData['employee_group_id'] == $newData['employee_group_id']
