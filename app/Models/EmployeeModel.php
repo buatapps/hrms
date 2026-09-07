@@ -351,6 +351,7 @@ class EmployeeModel extends Model
         $builder = $this->db->table('data_employee');
         $builder->where('division_id', $division_id);
         $builder->where('employee_status_id !=', 3);
+        $builder->where('deleted_at', null);
         $builder->orderBy('employee_group_id', 'ASC');
         $builder->orderBy('plant_id', 'ASC');
         $query = $builder->get();

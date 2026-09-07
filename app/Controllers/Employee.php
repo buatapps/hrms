@@ -1302,6 +1302,13 @@ class Employee extends BaseController
     function employee_division_edit($id)
     {
         $list_data = $this->EmployeeModel->employeeDetails($id);
+        
+        // Validasi: cek apakah employee ditemukan
+        if (!$list_data) {
+            return redirect()->to(base_url('employee/employee_division/' . user()->division_id))
+                ->with('error', 'Employee not found');
+        }
+        
         $data = [
             'title' => 'Employee Edit',
             'list_data' => $list_data,
@@ -1313,7 +1320,6 @@ class Employee extends BaseController
 
     function employee_division_update()
     {
-        $division_id = user()->division_id;
         $employee_id = $this->request->getVar('id');
         $plant_id = $this->request->getVar('plant_id');
         $employee_group_id = $this->request->getVar('employee_group_id');
@@ -1323,9 +1329,12 @@ class Employee extends BaseController
 
         // Validasi: cek apakah employee ditemukan
         if (!$oldData) {
-            return redirect()->to(base_url('employee/employee_division/' . $division_id))
+            return redirect()->to(base_url('employee/employee_division/' . user()->division_id))
                 ->with('error', 'Employee not found');
         }
+
+        // Ambil division_id dari employee yang diedit, bukan dari user yang login
+        $division_id = $oldData['division_id'];
 
         $data = [
             'plant_id' => $plant_id,
