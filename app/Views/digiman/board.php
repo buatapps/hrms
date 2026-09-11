@@ -246,7 +246,7 @@
 
         <div class="footer">
             <div class="footer-track">
-                <span class="footer-text">Digiman (Digital Informasi Namicoh ) Powered By PT.Namicoh Indonesia Component -PGA 2026</span>
+                <span class="footer-text">Digiman (Digital Informasi Namicoh ) Powered By PT.Namicoh Indonesia Component - PGA 2026</span>
             </div>
         </div>
     </div>
