@@ -148,5 +148,8 @@ nb-configuration.xml
 /uploads/*
 !/uploads/.gitkeep
 
+/assets/video/*
+!/assets/video/.gitkeep
+
 # --- Abaikan file .env ---
 .env
