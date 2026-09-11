@@ -150,6 +150,7 @@ nb-configuration.xml
 
 /assets/video/*
 !/assets/video/.gitkeep
+!/assets/video/.htaccess
 
 # --- Abaikan file .env ---
 .env
