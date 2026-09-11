@@ -152,6 +152,11 @@ class Digiman extends BaseController
             $file->move($dir, $newName);
             $videoName   = $newName;
             $newUploaded = true;
+
+            $compressed = $this->compressVideoOnUpload($dir, $newName);
+            if ($compressed) {
+                $videoName = $compressed;
+            }
         }
 
         // saat edit tanpa file baru, pertahankan nama video lama
@@ -198,5 +203,70 @@ class Digiman extends BaseController
             $this->DigimanVideoModel->delete($id);
         }
         return redirect()->to(base_url('digiman'))->with('success', 'Video <strong>deleted</strong>')->with('tab', 'video');
+    }
+
+    private function findFFmpeg()
+    {
+        if (function_exists('exec') && !in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))), true)) {
+            $probe = @exec('where ffmpeg 2>nul');
+            if ($probe && is_file(trim($probe))) {
+                return trim($probe);
+            }
+        }
+
+        $candidates = [
+            getenv('FFMPEG_PATH'),
+            'C:/ffmpeg/bin/ffmpeg.exe',
+            'C:/xampp/ffmpeg/bin/ffmpeg.exe',
+            'D:/ffmpeg/bin/ffmpeg.exe',
+            '/usr/bin/ffmpeg',
+            '/usr/local/bin/ffmpeg'
+        ];
+
+        foreach ($candidates as $candidate) {
+            if ($candidate && file_exists($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function compressVideoOnUpload($dir, $fileName)
+    {
+        $ffmpeg = $this->findFFmpeg();
+        if (!$ffmpeg) {
+            return null;
+        }
+
+        $source   = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
+        $destName = pathinfo($fileName, PATHINFO_FILENAME) . '_comp.mp4';
+        $dest     = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $destName;
+
+        if (!@set_time_limit(600)) {
+            set_time_limit(600);
+        }
+
+        $cmd = escapeshellarg($ffmpeg)
+            . ' -y -hide_banner -loglevel error -i ' . escapeshellarg($source)
+            . ' -c:v libx264 -preset veryfast -crf 28 -pix_fmt yuv420p'
+            . ' -movflags +faststart'
+            . ' -c:a aac -b:a 96k'
+            . ' ' . escapeshellarg($dest)
+            . ' 2>&1';
+
+        $output = [];
+        $code   = 0;
+        exec($cmd, $output, $code);
+
+        if ($code === 0 && file_exists($dest)) {
+            @unlink($source);
+            return $destName;
+        }
+
+        if (file_exists($dest)) {
+            @unlink($dest);
+        }
+        return null;
     }
 }

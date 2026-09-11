@@ -1,0 +1,32 @@
+# ============================================================
+# Streaming video optimal untuk Digiman board
+# Memastikan browser dapat meminta bagian file (HTTP Range /
+# Partial Content) sehingga video 124MB+ bisa mulai putar cepat
+# tanpa men-download seluruh file.
+# ============================================================
+
+<IfModule mod_mime.c>
+    AddType video/mp4  .mp4 .m4v
+    AddType video/webm .webm
+    AddType video/ogg  .ogv .ogg
+</IfModule>
+
+# Pastikan Apache selalu mengirim header Accept-Ranges: bytes
+# Agar browser bisa seek & buffer per potongan (bukan full-file).
+SetEnvIf REQUEST_URI \.mp4$ VIDEO_STREAM=1
+SetEnvIf REQUEST_URI \.webm$ VIDEO_STREAM=1
+SetEnvIf REQUEST_URI \.mov$ VIDEO_STREAM=1
+SetEnvIf REQUEST_URI \.m4v$ VIDEO_STREAM=1
+
+<IfModule mod_headers.c>
+    Header set Accept-Ranges bytes env=VIDEO_STREAM
+
+    # Cache lokal: video tidak perlu di-download ulang tiap refresh
+    Header set Cache-Control "public, max-age=86400" env=VIDEO_STREAM
+
+    # Cegah download streaming video malah dikompres (bisa pecah)
+    SetEnv no-gzip 1
+</IfModule>
+
+# Nonaktifkan sendfile bila ada masalah pada network share (opsional)
+# EnableSendfile Off

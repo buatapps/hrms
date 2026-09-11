@@ -143,7 +143,8 @@
 
         /* ----- KANAN ----- */
         .right-panel {
-            width: 92%;
+            flex: 1 1 0%;
+            min-width: 0;
             position: relative;
             background: #000000;
             overflow: hidden;
@@ -155,7 +156,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: none;
         }
 
@@ -237,7 +238,7 @@
                     <div class="no-video">Tidak ada video</div>
                 <?php else : ?>
                     <?php foreach ($videos as $v) : ?>
-                        <video class="video-item" src="<?= base_url('assets/video/' . $v); ?>" muted playsinline preload="auto"></video>
+                        <video class="video-item" src="<?= base_url('assets/video/' . $v); ?>" muted playsinline preload="none"></video>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
@@ -245,30 +246,40 @@
 
         <div class="footer">
             <div class="footer-track">
-                <span class="footer-text">Digiman ( Digital Informasi Namicoh ) Power by PT Namicoh Indonesia Components 2026</span>
+                <span class="footer-text">Digiman (Digital Informasi Namicoh ) Powered By PT.Namicoh Indonesia Component -PGA 2026</span>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== Jam Realtime =====
+        // ===== Jam Realtime (WIB / Asia/Jakarta UTC+7, bebas zona waktu device) =====
         function two(n) {
             return String(n).padStart(2, '0');
         }
 
+        function jakartaTime() {
+            var jkt = new Date(Date.now() + 7 * 3600000);
+            return {
+                hours: two(jkt.getUTCHours()),
+                minutes: two(jkt.getUTCMinutes()),
+                seconds: two(jkt.getUTCSeconds()),
+                dayIdx: jkt.getUTCDay(),
+                dayNum: jkt.getUTCDate(),
+                monthIdx: jkt.getUTCMonth(),
+                year: jkt.getUTCFullYear()
+            };
+        }
+
         function tickClock() {
-            var now = new Date();
-            var h = two(now.getHours());
-            var m = two(now.getMinutes());
-            var s = two(now.getSeconds());
-            document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+            var t = jakartaTime();
+            document.getElementById('clock').textContent = t.hours + ':' + t.minutes + ':' + t.seconds;
 
             var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             var months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',
                 'Agustus', 'September', 'Oktober', 'November', 'Desember'
             ];
             document.getElementById('dateStr').textContent =
-                days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+                days[t.dayIdx] + ', ' + t.dayNum + ' ' + months[t.monthIdx] + ' ' + t.year;
         }
 
         tickClock();
@@ -294,11 +305,24 @@
 
             var current = 0;
 
+            function preloadVideo(index) {
+                var idx = index % videos.length;
+                var v = videos[idx];
+                if (v.getAttribute('data-loaded') === '1') return;
+                v.preload = 'auto';
+                v.setAttribute('data-loaded', '1');
+                v.load();
+            }
+
             function showVideo(index) {
                 videos[current].classList.remove('active');
                 videos[current].pause();
+                videos[current].removeAttribute('src');
+                videos[current].load();
                 current = index % videos.length;
                 var v = videos[current];
+                v.setAttribute('src', v.getAttribute('data-src'));
+                v.preload = 'auto';
                 v.currentTime = 0;
                 v.play();
                 v.classList.add('active');
@@ -306,9 +330,14 @@
                 for (var i = 0; i < dots.length; i++) {
                     dots[i].classList.toggle('active', i === current);
                 }
+
+                preloadVideo(current + 1);
             }
 
             videos.forEach(function(v, i) {
+                v.setAttribute('data-src', v.getAttribute('src'));
+                v.removeAttribute('src');
+                v.setAttribute('data-loaded', '0');
                 v.addEventListener('ended', function() {
                     showVideo(i + 1);
                 });
