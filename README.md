@@ -28,6 +28,52 @@ to your `app` folder. The affected files can be copied or merged from
 Copy `env` to `.env` and tailor for your app, specifically the baseURL
 and any database settings.
 
+## Modul Digiman (Digital Informasi Namicoh)
+
+Papan informasi digital: menampilkan jam WIB realtime (bebas zona waktu device),
+jadwal istirahat, dan slideshow video di TV/papan display.
+
+File terkait:
+
+- `app/Controllers/Digiman.php` — controller (upload video, jadwal istirahat)
+- `app/Views/digiman/index.php` — halaman admin (kelola video & istirahat)
+- `app/Views/digiman/board.php` — halaman display TV
+- `assets/video/.htaccess` — streaming video (HTTP Range / 206)
+- `digiman.sql` — tabel `jam_istirahat` & `digiman_video`
+
+### Instalasi FFmpeg (WAJIB untuk video besar mulus di TV)
+
+Video baru yang di-upload lewat menu Digiman otomatis dikompres ke **H.264
+profile main, level 4.0, maks 1920x1080, `+faststart`**, audio AAC 96k —
+format paling kompatibel dengan browser bawaan TV. Pakai FFmpeg (auto-detect).
+
+Cara termudah (klik 2x):
+
+```bat
+setup\install_ffmpeg.bat
+```
+
+Script mengunduh FFmpeg dan memasang ke `C:\ffmpeg\bin\ffmpeg.exe`.
+Jika folder `C:\ffmpeg` tidak bisa dibuat, jalankan `.bat` sebagai
+Administrator (klik kanan > Run as administrator).
+
+Dipasang manual: cukup letakkan `ffmpeg.exe` di salah satu path yang
+dikenali controller (`app/Controllers/Digiman.php` → `findFFmpeg()`):
+
+- `C:\ffmpeg\bin\ffmpeg.exe`
+- `C:\xampp\ffmpeg\bin\ffmpeg.exe`
+- atau tersedia di `PATH` (env `FFMPEG_PATH`)
+
+Tanpa FFmpeg, aplikasi tetap berjalan — video besar hanya disimpan apa
+adanya dan berisiko lag/patah saat diputar di TV.
+
+### Catatan
+
+- Video MP4 kecil (<= 8 MB) dilewati kompresi agar upload cepat.
+- Video lama yang di-upload **sebelum** FFmpeg terpasang tidak terkompres;
+  upload ulang lewat menu Digiman agar diproses.
+- Streaming video membutuhkan `mod_headers` Apache (aktif di XAMPP default).
+
 ## Important Change with index.php
 
 `index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
