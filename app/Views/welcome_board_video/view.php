@@ -139,7 +139,8 @@
 
         /* ----- KANAN ----- */
         .right-panel {
-            width: 75%;
+            flex: 1 1 0%;
+            min-width: 0;
             position: relative;
             background: #000000;
             overflow: hidden;
@@ -151,7 +152,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: none;
         }
 
@@ -170,6 +171,34 @@
             justify-content: center;
             font-size: 2rem;
             color: #a9c9ff;
+        }
+
+        /* indikator buffering */
+        .loading-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #6fb7ff;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* ===== FOOTER ===== */
@@ -225,9 +254,12 @@
                     <div class="no-video">Tidak ada video</div>
                 <?php else : ?>
                     <?php foreach ($videos as $v) : ?>
-                        <video class="video-item" src="<?= base_url('assets/video/' . $v); ?>" muted playsinline preload="auto"></video>
+                        <video class="video-item" src="<?= base_url('assets/video/' . $v); ?>" muted playsinline preload="none"></video>
                     <?php endforeach; ?>
                 <?php endif; ?>
+                <div class="loading-indicator" id="videoLoading" style="display:none;">
+                    <div class="spinner"></div>
+                </div>
             </div>
         </div>
 
@@ -238,24 +270,34 @@
     </div>
 
     <script>
-        // ===== Jam Realtime =====
+        // ===== Jam Realtime (WIB / Asia/Jakarta UTC+7, bebas zona waktu device) =====
         function two(n) {
             return String(n).padStart(2, '0');
         }
 
+        function jakartaTime() {
+            var jkt = new Date(Date.now() + 7 * 3600000);
+            return {
+                hours: two(jkt.getUTCHours()),
+                minutes: two(jkt.getUTCMinutes()),
+                seconds: two(jkt.getUTCSeconds()),
+                dayIdx: jkt.getUTCDay(),
+                dayNum: jkt.getUTCDate(),
+                monthIdx: jkt.getUTCMonth(),
+                year: jkt.getUTCFullYear()
+            };
+        }
+
         function tickClock() {
-            var now = new Date();
-            var h = two(now.getHours());
-            var m = two(now.getMinutes());
-            var s = two(now.getSeconds());
-            document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+            var t = jakartaTime();
+            document.getElementById('clock').textContent = t.hours + ':' + t.minutes + ':' + t.seconds;
 
             var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             var months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',
                 'Agustus', 'September', 'Oktober', 'November', 'Desember'
             ];
             document.getElementById('dateStr').textContent =
-                days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+                days[t.dayIdx] + ', ' + t.dayNum + ' ' + months[t.monthIdx] + ' ' + t.year;
         }
 
         tickClock();
@@ -280,14 +322,53 @@
             var dots = dotsWrap.children;
 
             var current = 0;
+            var preloadingNext = false;
+            var loadingEl = document.getElementById('videoLoading');
+
+            function showVideoLoading() {
+                if (loadingEl) loadingEl.style.display = 'flex';
+            }
+
+            function hideVideoLoading() {
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+
+            function safePlay(v) {
+                try {
+                    v.currentTime = 0;
+                } catch (e) {}
+                var p = v.play();
+                if (p && typeof p.catch === 'function') {
+                    p.catch(function() {});
+                }
+            }
+
+            // preload video berikutnya HANYA setelah video aktif benar-benar jalan,
+            // supaya tidak berebut bandwidth saat pertama kali dibuka.
+            function maybePreloadNext() {
+                if (preloadingNext || videos.length <= 1) return;
+                preloadingNext = true;
+                var next = (current + 1) % videos.length;
+                videos[next].preload = 'auto';
+                videos[next].load();
+            }
 
             function showVideo(index) {
-                videos[current].classList.remove('active');
-                videos[current].pause();
-                current = index % videos.length;
+                var target = index % videos.length;
+
+                for (var i = 0; i < videos.length; i++) {
+                    if (i !== target) {
+                        videos[i].pause();
+                        videos[i].preload = 'none';
+                        videos[i].classList.remove('active');
+                    }
+                }
+
+                current = target;
+                preloadingNext = false;
                 var v = videos[current];
-                v.currentTime = 0;
-                v.play();
+                v.preload = 'auto';
+                safePlay(v);
                 v.classList.add('active');
 
                 for (var i = 0; i < dots.length; i++) {
@@ -296,6 +377,16 @@
             }
 
             videos.forEach(function(v, i) {
+                v.addEventListener('playing', function() {
+                    hideVideoLoading();
+                    maybePreloadNext();
+                });
+                v.addEventListener('waiting', function() {
+                    showVideoLoading();
+                });
+                v.addEventListener('stalled', function() {
+                    showVideoLoading();
+                });
                 v.addEventListener('ended', function() {
                     showVideo(i + 1);
                 });

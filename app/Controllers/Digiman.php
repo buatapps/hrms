@@ -64,6 +64,8 @@ class Digiman extends BaseController
 
     public function board()
     {
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('Pragma: no-cache');
         $data = [
             'title'         => 'Digiman',
             'videos'        => $this->activeVideos(),

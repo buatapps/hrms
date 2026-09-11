@@ -47,6 +47,8 @@ class WelcomeBoardVideo extends BaseController
 
     public function index()
     {
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('Pragma: no-cache');
         $data = [
             'title'         => 'Welcome Board Video',
             'videos'        => $this->activeVideos(),
