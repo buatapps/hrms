@@ -305,39 +305,46 @@
 
             var current = 0;
 
-            function preloadVideo(index) {
-                var idx = index % videos.length;
-                var v = videos[idx];
-                if (v.getAttribute('data-loaded') === '1') return;
-                v.preload = 'auto';
-                v.setAttribute('data-loaded', '1');
-                v.load();
+            function safePlay(v) {
+                try {
+                    v.currentTime = 0;
+                } catch (e) {}
+                var p = v.play();
+                if (p && typeof p.catch === 'function') {
+                    p.catch(function() {});
+                }
             }
 
             function showVideo(index) {
-                videos[current].classList.remove('active');
-                videos[current].pause();
-                videos[current].removeAttribute('src');
-                videos[current].load();
-                current = index % videos.length;
+                var target = index % videos.length;
+
+                for (var i = 0; i < videos.length; i++) {
+                    if (i !== target) {
+                        videos[i].pause();
+                        videos[i].preload = 'none';
+                        videos[i].classList.remove('active');
+                    }
+                }
+
+                current = target;
                 var v = videos[current];
-                v.setAttribute('src', v.getAttribute('data-src'));
                 v.preload = 'auto';
-                v.currentTime = 0;
-                v.play();
+                safePlay(v);
                 v.classList.add('active');
 
                 for (var i = 0; i < dots.length; i++) {
                     dots[i].classList.toggle('active', i === current);
                 }
 
-                preloadVideo(current + 1);
+                // preload video berikutnya agar transisi tidak patah-patah
+                if (videos.length > 1) {
+                    var next = (current + 1) % videos.length;
+                    videos[next].preload = 'auto';
+                    videos[next].load();
+                }
             }
 
             videos.forEach(function(v, i) {
-                v.setAttribute('data-src', v.getAttribute('src'));
-                v.removeAttribute('src');
-                v.setAttribute('data-loaded', '0');
                 v.addEventListener('ended', function() {
                     showVideo(i + 1);
                 });
