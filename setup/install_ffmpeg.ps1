@@ -63,7 +63,14 @@ try {
     if (-not (Test-Path -LiteralPath $targetExe) -or -not $ver) { throw 'Instalasi gagal / ffmpeg tidak jalan.' }
     Write-Host "  $ver" -ForegroundColor White
 
-    # 6. Bersihkan file sementara
+    # 6. Tambahkan C:\ffmpeg\bin ke PATH user (agar perintah 'ffmpeg' dikenali)
+    $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    if ($userPath -notlike '*C:\ffmpeg\bin*') {
+        [Environment]::SetEnvironmentVariable('Path', ($userPath.TrimEnd(';') + ';C:\ffmpeg\bin'), 'User')
+        Write-Host "  Path C:\ffmpeg\bin ditambahkan ke PATH user (buka terminal baru)." -ForegroundColor Yellow
+    }
+
+    # 7. Bersihkan file sementara
     Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
     Remove-Item -Force $zip -ErrorAction SilentlyContinue
 

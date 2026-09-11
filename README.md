@@ -53,7 +53,9 @@ Cara termudah (klik 2x):
 setup\install_ffmpeg.bat
 ```
 
-Script mengunduh FFmpeg dan memasang ke `C:\ffmpeg\bin\ffmpeg.exe`.
+Script mengunduh FFmpeg dan memasang ke `C:\ffmpeg\bin\ffmpeg.exe`,
+lalu menambahkan `C:\ffmpeg\bin` ke PATH user (efektif di terminal baru —
+buka jendela PowerShell/CMD baru agar perintah `ffmpeg` dikenali).
 Jika folder `C:\ffmpeg` tidak bisa dibuat, jalankan `.bat` sebagai
 Administrator (klik kanan > Run as administrator).
 
