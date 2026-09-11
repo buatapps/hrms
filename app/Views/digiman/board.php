@@ -177,6 +177,34 @@
             color: #a9c9ff;
         }
 
+        /* indikator buffering */
+        .loading-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #6fb7ff;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* ===== FOOTER ===== */
         .footer {
             background: #173e83;
@@ -241,6 +269,9 @@
                         <video class="video-item" src="<?= base_url('assets/video/' . $v); ?>" muted playsinline preload="none"></video>
                     <?php endforeach; ?>
                 <?php endif; ?>
+                <div class="loading-indicator" id="videoLoading" style="display:none;">
+                    <div class="spinner"></div>
+                </div>
             </div>
         </div>
 
@@ -304,6 +335,16 @@
             var dots = dotsWrap.children;
 
             var current = 0;
+            var preloadingNext = false;
+            var loadingEl = document.getElementById('videoLoading');
+
+            function showVideoLoading() {
+                if (loadingEl) loadingEl.style.display = 'flex';
+            }
+
+            function hideVideoLoading() {
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
 
             function safePlay(v) {
                 try {
@@ -313,6 +354,16 @@
                 if (p && typeof p.catch === 'function') {
                     p.catch(function() {});
                 }
+            }
+
+            // preload video berikutnya HANYA setelah video aktif benar-benar jalan,
+            // supaya tidak berebut bandwidth saat pertama kali dibuka.
+            function maybePreloadNext() {
+                if (preloadingNext || videos.length <= 1) return;
+                preloadingNext = true;
+                var next = (current + 1) % videos.length;
+                videos[next].preload = 'auto';
+                videos[next].load();
             }
 
             function showVideo(index) {
@@ -327,6 +378,7 @@
                 }
 
                 current = target;
+                preloadingNext = false;
                 var v = videos[current];
                 v.preload = 'auto';
                 safePlay(v);
@@ -335,16 +387,19 @@
                 for (var i = 0; i < dots.length; i++) {
                     dots[i].classList.toggle('active', i === current);
                 }
-
-                // preload video berikutnya agar transisi tidak patah-patah
-                if (videos.length > 1) {
-                    var next = (current + 1) % videos.length;
-                    videos[next].preload = 'auto';
-                    videos[next].load();
-                }
             }
 
             videos.forEach(function(v, i) {
+                v.addEventListener('playing', function() {
+                    hideVideoLoading();
+                    maybePreloadNext();
+                });
+                v.addEventListener('waiting', function() {
+                    showVideoLoading();
+                });
+                v.addEventListener('stalled', function() {
+                    showVideoLoading();
+                });
                 v.addEventListener('ended', function() {
                     showVideo(i + 1);
                 });

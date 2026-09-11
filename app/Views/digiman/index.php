@@ -255,7 +255,7 @@
                         <label class="form-label">File Video</label>
                         <input type="file" class="form-control" name="video_file" accept="video/*"
                                data-upload-form="video-add" required>
-                        <div class="mt-2 form-text">Video akan disimpan di folder <code>assets/video/</code>. Maksimal ukuran <strong><?= $maxUploadSize ?></strong>.</div>
+                        <div class="mt-2 form-text">Video akan disimpan di folder <code>assets/video/</code>. Maksimal ukuran <strong><?= $maxUploadSize ?></strong>. Video <strong>&gt; 8 MB</strong> otomatis dikompres ke H.264 1080p agar mulus di TV.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Status</label>

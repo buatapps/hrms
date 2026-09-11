@@ -239,7 +239,14 @@ class Digiman extends BaseController
             return null;
         }
 
-        $source   = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
+        $source = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
+
+        // file mp4 kecil yang sudah bagus tidak perlu dikompres ulang
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        if (in_array($ext, ['mp4', 'm4v'], true) && filesize($source) <= 8 * 1024 * 1024) {
+            return null;
+        }
+
         $destName = pathinfo($fileName, PATHINFO_FILENAME) . '_comp.mp4';
         $dest     = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $destName;
 
@@ -249,7 +256,8 @@ class Digiman extends BaseController
 
         $cmd = escapeshellarg($ffmpeg)
             . ' -y -hide_banner -loglevel error -i ' . escapeshellarg($source)
-            . ' -c:v libx264 -preset veryfast -crf 28 -pix_fmt yuv420p'
+            . ' -vf "scale=w=\'min(1920,iw)\':h=\'min(1080,ih)\':force_original_aspect_ratio=decrease"'
+            . ' -c:v libx264 -profile:v main -level 4.0 -preset veryfast -crf 26 -pix_fmt yuv420p'
             . ' -movflags +faststart'
             . ' -c:a aac -b:a 96k'
             . ' ' . escapeshellarg($dest)
