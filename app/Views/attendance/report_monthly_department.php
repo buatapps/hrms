@@ -73,11 +73,15 @@
                                     <label class="form-label">Division</label>
                                     <select name="division_id" class="form-control select2">
                                         <option value="">-- All --</option>
-                                        <?php foreach ($division as $row): ?>
-                                            <option value="<?= $row->id ?>" <?= ($row->id == $division_id) ? 'selected' : '' ?>>
-                                                <?= $row->name ?>
-                                            </option>
-                                        <?php endforeach; ?>
+                                        <?php if (!empty($division)): ?>
+                                            <?php foreach ($division as $row): ?>
+                                                <?php if ($row): ?>
+                                                    <option value="<?= $row->id ?>" <?= ($row->id == $division_id) ? 'selected' : '' ?>>
+                                                        <?= $row->name ?>
+                                                    </option>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </select>
                                 </div>
                             </div>
@@ -87,11 +91,15 @@
                                     <label class="form-label">Plant</label>
                                     <select name="plant_id" class="form-control select2">
                                         <option value="">-- All --</option>
-                                        <?php foreach ($plant as $row): ?>
-                                            <option value="<?= $row->id ?>" <?= ($row->id == $plant_id) ? 'selected' : '' ?>>
-                                                <?= $row->name ?>
-                                            </option>
-                                        <?php endforeach; ?>
+                                        <?php if (!empty($plant)): ?>
+                                            <?php foreach ($plant as $row): ?>
+                                                <?php if ($row): ?>
+                                                    <option value="<?= $row->id ?>" <?= ($row->id == $plant_id) ? 'selected' : '' ?>>
+                                                        <?= $row->name ?>
+                                                    </option>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </select>
                                 </div>
                             </div>
@@ -101,11 +109,15 @@
                                     <label class="form-label">Group</label>
                                     <select name="employee_group_id" class="form-control select2">
                                         <option value="">-- All --</option>
-                                        <?php foreach ($group as $row): ?>
-                                            <option value="<?= $row->id ?>" <?= ($row->id == $employee_group_id) ? 'selected' : '' ?>>
-                                                <?= $row->name ?>
-                                            </option>
-                                        <?php endforeach; ?>
+                                        <?php if (!empty($group)): ?>
+                                            <?php foreach ($group as $row): ?>
+                                                <?php if ($row): ?>
+                                                    <option value="<?= $row->id ?>" <?= ($row->id == $employee_group_id) ? 'selected' : '' ?>>
+                                                        <?= $row->name ?>
+                                                    </option>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </select>
                                 </div>
                             </div>

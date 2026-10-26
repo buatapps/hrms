@@ -1260,45 +1260,53 @@ class Attendance extends BaseController
 
     public function reportmonthlydepartment()
     {
-        $start_date = $this->request->getGet('start_date') ?: date('Y-m-20', strtotime('-1 month'));
-        $end_date   = $this->request->getGet('end_date') ?: date('Y-m-21');
+        try {
+            $start_date = $this->request->getGet('start_date') ?: date('Y-m-20', strtotime('-1 month'));
+            $end_date   = $this->request->getGet('end_date') ?: date('Y-m-21');
 
-        $plant_id = $this->request->getGet('plant_id');
-        $employee_group_id = $this->request->getGet('employee_group_id');
-        
-        $input_division = $this->request->getGet('division_id');
-        $division_id = empty($input_division) ? '' : resolveDivisionFilter($input_division);
+            $plant_id = $this->request->getGet('plant_id');
+            $employee_group_id = $this->request->getGet('employee_group_id');
+            
+            $input_division = $this->request->getGet('division_id');
+            $division_id = empty($input_division) ? '' : resolveDivisionFilter($input_division);
 
-        /**
-         * =========================================================
-         * DIVISION
-         * =========================================================
-         */
-        $division = in_groups('admin')
-            ? [$this->DivisionModel->find(user()->division_id)]
-            : $this->DivisionModel->findAll();
+            // Cek apakah ada parameter GET (berarti dari form search)
+            $hasSearchParams = $this->request->getGet('start_date') !== null;
 
-        // Cek apakah ada parameter GET (berarti dari form search)
-        $hasSearchParams = $this->request->getGet('start_date') !== null;
+            /**
+             * =========================================================
+             * DIVISION
+             * =========================================================
+             */
+            if (in_groups('admin') && user()) {
+                $division = [$this->DivisionModel->find(user()->division_id)];
+                $division = array_filter($division); // Remove null values
+            } else {
+                $division = $this->DivisionModel->findAll();
+            }
 
-        if (!$hasSearchParams) {
-            // Halaman pertama: hanya tampilkan form, tidak load data
-            return view('attendance/report_monthly_department', [
-                'title' => 'Report Attendance Monthly Department',
-                'periode_label' => '',
-                'period' => [],
-                'start_date' => $start_date,
-                'end_date' => $end_date,
-                'division_id' => $division_id,
-                'plant_id' => $plant_id,
-                'employee_group_id' => $employee_group_id,
-                'division' => $division,
-                'plant' => $this->PlantModel->findAll(),
-                'group' => $this->EmployeeGroupModel->findAll(),
-                'employees' => [],
-                'scanMap' => [],
-                'showData' => false
-            ]);
+            if (!$hasSearchParams) {
+                // Halaman pertama: hanya tampilkan form, tidak load data
+                return view('attendance/report_monthly_department', [
+                    'title' => 'Report Attendance Monthly Department',
+                    'periode_label' => '',
+                    'period' => [],
+                    'start_date' => $start_date,
+                    'end_date' => $end_date,
+                    'division_id' => $division_id,
+                    'plant_id' => $plant_id,
+                    'employee_group_id' => $employee_group_id,
+                    'division' => $division,
+                    'plant' => $this->PlantModel->findAll(),
+                    'group' => $this->EmployeeGroupModel->findAll(),
+                    'employees' => [],
+                    'scanMap' => [],
+                    'showData' => false
+                ]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error in reportmonthlydepartment initial load: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat halaman.');
         }
 
         // Jika ada parameter search, lanjutkan proses data
