@@ -1266,9 +1266,9 @@ class Attendance extends BaseController
         $plant_id = $this->request->getGet('plant_id');
         $employee_group_id = $this->request->getGet('employee_group_id');
         
-        // $division_id = resolveDivisionFilter($this->request->getGet('division_id'));
         $input_division = $this->request->getGet('division_id');
-        $division_id = empty($input_division) ? 1 : resolveDivisionFilter($input_division);
+        $division_id = empty($input_division) ? '' : resolveDivisionFilter($input_division);
+
         /**
          * =========================================================
          * DIVISION
@@ -1278,6 +1278,30 @@ class Attendance extends BaseController
             ? [$this->DivisionModel->find(user()->division_id)]
             : $this->DivisionModel->findAll();
 
+        // Cek apakah ada parameter GET (berarti dari form search)
+        $hasSearchParams = $this->request->getGet('start_date') !== null;
+
+        if (!$hasSearchParams) {
+            // Halaman pertama: hanya tampilkan form, tidak load data
+            return view('attendance/report_monthly_department', [
+                'title' => 'Report Attendance Monthly Department',
+                'periode_label' => '',
+                'period' => [],
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+                'division_id' => $division_id,
+                'plant_id' => $plant_id,
+                'employee_group_id' => $employee_group_id,
+                'division' => $division,
+                'plant' => $this->PlantModel->findAll(),
+                'group' => $this->EmployeeGroupModel->findAll(),
+                'employees' => [],
+                'scanMap' => [],
+                'showData' => false
+            ]);
+        }
+
+        // Jika ada parameter search, lanjutkan proses data
         /**
          * =========================================================
          * EMPLOYEE MASTER
@@ -1525,7 +1549,8 @@ class Attendance extends BaseController
             'group'    => $this->EmployeeGroupModel->findAll(),
 
             'employees' => $employees,
-            'scanMap'   => $scanMap
+            'scanMap'   => $scanMap,
+            'showData'  => true
         ]);
     }
 

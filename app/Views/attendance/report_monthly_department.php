@@ -124,6 +124,7 @@
             </div>
         </div>
     </div>
+    <?php if ($showData): ?>
     <div class="row">
         <div class="col-xl-12 col-sm-12">
             <div class="card">
@@ -278,6 +279,7 @@
             </div>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 
 
@@ -285,6 +287,12 @@
 function exportTablesToExcel() {
     var tableAbsensi = document.getElementById('tabelAbsensi');
     var tableOvertime = document.getElementById('tabelOvertime');
+    
+    // Check if tables exist
+    if (!tableAbsensi || !tableOvertime) {
+        alert('Tidak ada data untuk di-export. Silakan klik Search terlebih dahulu.');
+        return;
+    }
     
     // Trik CSS untuk border tipis (standard Excel look)
     var style = "<style>" +
