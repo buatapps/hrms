@@ -1260,8 +1260,8 @@ class Attendance extends BaseController
 
     public function reportmonthlydepartment()
     {
-        $start_date = $this->request->getGet('start_date') ?: date('Y-m-25', strtotime('-1 month'));
-        $end_date   = $this->request->getGet('end_date') ?: date('Y-m-24');
+        $start_date = $this->request->getGet('start_date') ?: date('Y-m-20', strtotime('-1 month'));
+        $end_date   = $this->request->getGet('end_date') ?: date('Y-m-21');
 
         $plant_id = $this->request->getGet('plant_id');
         $employee_group_id = $this->request->getGet('employee_group_id');
@@ -1444,7 +1444,16 @@ class Attendance extends BaseController
                 if ($clockOut) {
 
                     // ADA SCHEDULE
-                    $overtimeSeconds = strtotime($outTime) - strtotime($clockOut);
+                    // Cek hari: Senin-Kamis dapat toleransi 10 menit
+                    $dayOfWeek = date('N', strtotime($date)); // 1=Senin, 7=Minggu
+                    $adjustedClockOut = $clockOut;
+                    
+                    if ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
+                        // Senin sampai Kamis: tambah 10 menit toleransi
+                        $adjustedClockOut = date('H:i:s', strtotime($clockOut) + (10 * 60));
+                    }
+
+                    $overtimeSeconds = strtotime($outTime) - strtotime($adjustedClockOut);
 
                     if ($overtimeSeconds > 0) {
 
