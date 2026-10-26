@@ -1444,13 +1444,16 @@ class Attendance extends BaseController
                 if ($clockOut) {
 
                     // ADA SCHEDULE
-                    // Cek hari: Senin-Kamis dapat toleransi 10 menit
+                    // Cek hari: Senin-Kamis dapat toleransi 10 menit, Jumat fixed 18:20
                     $dayOfWeek = date('N', strtotime($date)); // 1=Senin, 7=Minggu
                     $adjustedClockOut = $clockOut;
                     
                     if ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
                         // Senin sampai Kamis: tambah 10 menit toleransi
                         $adjustedClockOut = date('H:i:s', strtotime($clockOut) + (10 * 60));
+                    } elseif ($dayOfWeek == 5) {
+                        // Jumat: fixed overtime start dari 18:20
+                        $adjustedClockOut = '18:20:00';
                     }
 
                     $overtimeSeconds = strtotime($outTime) - strtotime($adjustedClockOut);

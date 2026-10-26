@@ -144,11 +144,13 @@
                             <i class="mdi mdi-file-excel"></i> Export Excel
                         </button>
                     </form> -->
-                    <button onclick="exportTableToExcel('tabelAttendance', 'Report_Attendance')" class="btn btn-success">
+                    <button onclick="exportTablesToExcel()" class="btn btn-success">
                         <i class="mdi mdi-file-excel"></i> Export to Excel
                     </button>
+                    
+                    <h5 class="mt-4 mb-3">Tabel Absensi</h5>
                     <div class="filter-scroll">
-                        <table id="tabelAttendance" class="table table-bordered nowrap">
+                        <table id="tabelAbsensi" class="table table-bordered nowrap">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -161,7 +163,67 @@
                                     <?php foreach ($period as $date): ?>
                                         <th colspan="2" class="text-center"><?= $date->format('j M y') ?></th>
                                     <?php endforeach; ?>
-                                    <th>Overtime</th>
+                                    <th>Total Hadir</th>
+                                    <th>Total Absent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php $no = 1; ?>
+                                <?php foreach ($employees as $emp): ?>
+                                    <?php
+                                    $totalHadir = 0;
+                                    $totalAbsent = 0;
+                                    ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td><?= $emp->employee_id ?></td>
+                                        <td><?= strtoupper($emp->name) ?></td>
+                                        <td><?= $emp->division ?></td>
+                                        <td><?= $emp->plant ?></td>
+                                        <td><?= $emp->employee_group ?></td>
+
+                                        <?php foreach ($period as $date): ?>
+                                            <?php
+                                            $tgl = $date->format('Y-m-d');
+
+                                            $in  = $scanMap[$emp->id][$tgl]['in'] ?? '-';
+                                            $out = $scanMap[$emp->id][$tgl]['out'] ?? '-';
+
+                                            if ($in != '-' || $out != '-') {
+                                                $totalHadir++;
+                                            } else {
+                                                $totalAbsent++;
+                                            }
+                                            ?>
+                                            <td><?= $in ?></td>
+                                            <td><?= $out ?></td>
+                                        <?php endforeach; ?>
+
+                                        <td><?= $totalHadir ?></td>
+                                        <td><?= $totalAbsent ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5 class="mt-5 mb-3">Tabel Overtime</h5>
+                    <div class="filter-scroll">
+                        <table id="tabelOvertime" class="table table-bordered nowrap">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Division</th>
+                                    <th>Plant</th>
+                                    <th>Group</th>
+
+                                    <?php foreach ($period as $date): ?>
+                                        <th class="text-center"><?= $date->format('j M y') ?></th>
+                                    <?php endforeach; ?>
+                                    <th>Total Overtime</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,50 +233,25 @@
                                     $totalOvertimeMinutes = 0;
                                     ?>
                                     <tr>
-                                        <td rowspan="2"><?= $no++ ?></td>
-                                        <td rowspan="2"><?= $emp->employee_id ?></td>
-                                        <td rowspan="2"><?= strtoupper($emp->name) ?></td>
-                                        <td rowspan="2"><?= $emp->division ?></td>
-                                        <td rowspan="2"><?= $emp->plant ?></td>
-                                        <td rowspan="2"><?= $emp->employee_group ?></td>
+                                        <td><?= $no++ ?></td>
+                                        <td><?= $emp->employee_id ?></td>
+                                        <td><?= strtoupper($emp->name) ?></td>
+                                        <td><?= $emp->division ?></td>
+                                        <td><?= $emp->plant ?></td>
+                                        <td><?= $emp->employee_group ?></td>
 
                                         <?php foreach ($period as $date): ?>
                                             <?php
                                             $tgl = $date->format('Y-m-d');
-
-                                            $in  = $scanMap[$emp->id][$tgl]['in'] ?? '-';
-                                            $out = $scanMap[$emp->id][$tgl]['out'] ?? '-';
                                             $ot  = $scanMap[$emp->id][$tgl]['overtime'] ?? '0.00';
 
                                             if ($ot != '0.00') {
-
                                                 [$jam, $menit] = explode('.', $ot);
-
-                                                $totalOvertimeMinutes +=
-                                                    ((int)$jam * 60) + (int)$menit;
+                                                $totalOvertimeMinutes += ((int)$jam * 60) + (int)$menit;
                                             }
                                             ?>
-                                            <td><?= $in ?></td>
-                                            <td><?= $out ?></td>
-                                        <?php endforeach; ?>
 
-                                        <?php
-                                        $totalJam   = floor($totalOvertimeMinutes / 60);
-                                        $totalMenit = $totalOvertimeMinutes % 60;
-
-                                        $totalOT = $totalJam . ' Jam ' . str_pad($totalMenit, 2, '0', STR_PAD_LEFT).' Menit';
-                                        ?>
-                                        <td rowspan="2"><?= $totalOT ?></td>
-                                    </tr>
-
-                                    <tr>
-                                        <?php foreach ($period as $date): ?>
-                                            <?php
-                                            $tgl = $date->format('Y-m-d');
-                                            $ot  = $scanMap[$emp->id][$tgl]['overtime'] ?? '0.00';
-                                            ?>
-
-                                            <td colspan="2" class="text-center text-danger fw-bold">
+                                            <td class="text-center <?= $ot != '0.00' ? 'text-danger fw-bold' : '' ?>">
                                                 <?php if ($ot != '0.00'): ?>
                                                     <?php [$jam, $menit] = explode('.', $ot); ?>
                                                     <?= $jam ?> Jam <?= str_pad($menit, 2, '0', STR_PAD_LEFT) ?> Menit
@@ -223,6 +260,14 @@
                                                 <?php endif; ?>
                                             </td>
                                         <?php endforeach; ?>
+
+                                        <?php
+                                        $totalJam   = floor($totalOvertimeMinutes / 60);
+                                        $totalMenit = $totalOvertimeMinutes % 60;
+
+                                        $totalOT = $totalJam . ' Jam ' . str_pad($totalMenit, 2, '0', STR_PAD_LEFT).' Menit';
+                                        ?>
+                                        <td><?= $totalOT ?></td>
                                     </tr>
                                 <?php endforeach; ?>
 
@@ -237,26 +282,34 @@
 
 
 <script>
-function exportTableToExcel(tableID, filename = '') {
-    var tableSelect = document.getElementById(tableID);
+function exportTablesToExcel() {
+    var tableAbsensi = document.getElementById('tabelAbsensi');
+    var tableOvertime = document.getElementById('tabelOvertime');
     
     // Trik CSS untuk border tipis (standard Excel look)
     var style = "<style>" +
-                "table { border-collapse: collapse; width: 100%; }" +
+                "table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }" +
                 "th, td { border: 0.5pt solid #000000; padding: 5px; }" +
                 "th { background-color: #efefef; font-weight: bold; }" +
+                "h3 { margin-top: 20px; margin-bottom: 10px; }" +
                 "</style>";
 
-    // Struktur XML untuk Excel agar tidak dianggap corrupt
+    // Struktur XML untuk Excel dengan 2 tabel
     var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
                    'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
                    'xmlns="http://www.w3.org/TR/REC-html40">' +
                    '<head>' + style + '</head>' +
-                   '<body>' + tableSelect.outerHTML + '</body></html>';
+                   '<body>' +
+                   '<h3>Tabel Absensi</h3>' +
+                   tableAbsensi.outerHTML +
+                   '<br><br>' +
+                   '<h3>Tabel Overtime</h3>' +
+                   tableOvertime.outerHTML +
+                   '</body></html>';
 
     var blob = new Blob(['\ufeff', template], { type: 'application/vnd.ms-excel' });
     
-    var filename = filename ? filename + '.xls' : 'Report_Attendance.xls';
+    var filename = 'Report_Attendance_' + new Date().toISOString().slice(0,10) + '.xls';
     
     var downloadLink = document.createElement("a");
     document.body.appendChild(downloadLink);
