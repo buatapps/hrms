@@ -41,9 +41,9 @@ class Idcard extends BaseController
         ]);
     }
 
-    public function printBack()
+    public function printBack($id = null)
     {
-        $employees = $this->IdcardModel->getEmployees(null, $this->getFilters());
+        $employees = $this->IdcardModel->getEmployees($id, $this->getFilters());
 
         return view('idcard/print_back', [
             'employees' => $employees,

@@ -135,6 +135,7 @@ $routes->get('employee/printCard/(:segment)', 'Employee::printCard/$1');
 $routes->get('employee/idcard', 'Idcard::index');
 $routes->get('employee/idcard/print/(:segment)', 'Idcard::print/$1');
 $routes->get('employee/idcard/print', 'Idcard::print');
+$routes->get('employee/idcard/print-back/(:segment)', 'Idcard::printBack/$1');
 $routes->get('employee/idcard/print-back', 'Idcard::printBack');
 
 $routes->get('employee/schedule', 'Employee::schedule');

@@ -93,7 +93,7 @@
                                 <th>Name</th>
                                 <th>Position</th>
                                 <th>Division</th>
-                                <th class="text-center">Print</th>
+                                <th class="text-center">Print Option</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -106,7 +106,16 @@
                                     <td><?= esc($row['position']); ?></td>
                                     <td><?= esc($row['division']); ?></td>
                                     <td class="text-center">
-                                        <a href="<?= base_url('employee/idcard/print/' . $row['id']); ?>" data-url="<?= base_url('employee/idcard/print/' . $row['id']); ?>" class="action-icon text-primary print-single-card" target="_blank"><i class="mdi mdi-printer"></i></a>
+                                        <div class="d-flex flex-column align-items-center gap-1">
+                                            <div class="form-check mb-0">
+                                                <input class="form-check-input mirror-single" type="checkbox" value="1" id="mirror-single-<?= esc($row['id']); ?>">
+                                                <label class="form-check-label" for="mirror-single-<?= esc($row['id']); ?>">Mirror</label>
+                                            </div>
+                                            <div class="d-flex flex-wrap justify-content-center gap-1">
+                                                <a href="<?= base_url('employee/idcard/print/' . $row['id']); ?>" data-url="<?= base_url('employee/idcard/print/' . $row['id']); ?>" class="btn btn-sm btn-primary print-single-card" target="_blank"><i class="mdi mdi-printer me-1"></i> Print</a>
+                                                <a href="<?= base_url('employee/idcard/print-back/' . $row['id']); ?>" data-url="<?= base_url('employee/idcard/print-back/' . $row['id']); ?>" class="btn btn-sm btn-outline-primary print-back-single-card" target="_blank"><i class="mdi mdi-printer me-1"></i> Print Back</a>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -122,18 +131,27 @@
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('idcard-filter-form');
         const mirror = document.getElementById('mirror');
+        const mirrorSingles = document.querySelectorAll('.mirror-single');
         const printAll = document.getElementById('print-all-card');
         const printBackAll = document.getElementById('print-back-all');
-        const printSingles = document.querySelectorAll('.print-single-card');
         const printFiltered = document.getElementById('print-filtered');
         const printBackFiltered = document.getElementById('print-back-filtered');
 
-        const updatePrintLinks = function () {
+        const updateTopLinks = function () {
             const suffix = mirror.checked ? '?mirror=1' : '';
             printAll.href = '<?= base_url('employee/idcard/print'); ?>' + suffix;
             printBackAll.href = '<?= base_url('employee/idcard/print-back'); ?>' + suffix;
-            printSingles.forEach(function (link) {
-                link.href = link.dataset.url + suffix;
+        };
+
+        const updateRowLinks = function () {
+            mirrorSingles.forEach(function (checkbox) {
+                const suffix = checkbox.checked ? '?mirror=1' : '';
+                const row = checkbox.closest('tr');
+                const printLink = row.querySelector('.print-single-card');
+                const printBackLink = row.querySelector('.print-back-single-card');
+
+                printLink.href = printLink.dataset.url + suffix;
+                printBackLink.href = printBackLink.dataset.url + suffix;
             });
         };
 
@@ -148,14 +166,18 @@
             return query ? '?' + query : '';
         };
 
-        mirror.addEventListener('change', updatePrintLinks);
+        mirror.addEventListener('change', updateTopLinks);
+        mirrorSingles.forEach(function (checkbox) {
+            checkbox.addEventListener('change', updateRowLinks);
+        });
         printFiltered.addEventListener('click', function () {
             window.open('<?= base_url('employee/idcard/print'); ?>' + buildPrintQuery(), '_blank');
         });
         printBackFiltered.addEventListener('click', function () {
             window.open('<?= base_url('employee/idcard/print-back'); ?>' + buildPrintQuery(), '_blank');
         });
-        updatePrintLinks();
+        updateTopLinks();
+        updateRowLinks();
     });
 </script>
 <?= $this->endSection() ?>
