@@ -33,9 +33,56 @@ $mirror         = !empty($mirror);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ID Card Belakang - <?= esc($nama_perusahaan) ?></title>
     <style>
-        <?= view('idcard/_print_sheet') ?>
+        * {
+            box-sizing: border-box;
+        }
 
-        .id-card-back {
+        body {
+            margin: 0;
+            padding: 20px 0;
+            background: #f4f6f8;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body.mirror .id-card {
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+            transform-origin: center;
+        }
+
+        .print-sheet {
+            position: relative;
+            width: 210mm;
+            height: 297mm;
+            padding: 10mm;
+            background: #ffffff;
+            display: grid;
+            grid-template-columns: repeat(3, 54mm);
+            grid-template-rows: repeat(3, 86mm);
+            column-gap: 14mm;
+            row-gap: 9.5mm;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+            page-break-after: always;
+            break-after: page;
+        }
+
+        .print-sheet:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+
+        .card-wrap {
+            width: 54mm;
+            height: 86mm;
+        }
+
+        .id-card {
             position: relative;
             width: 54mm;
             height: 86mm;
@@ -44,7 +91,6 @@ $mirror         = !empty($mirror);
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             padding: 12mm 3.5mm 11mm;
-            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -137,7 +183,35 @@ $mirror         = !empty($mirror);
         }
 
         @media print {
-            .id-card-back {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: none;
+                display: block;
+            }
+
+            body.mirror .id-card {
+                transform: scaleX(-1);
+                -webkit-transform: scaleX(-1);
+                transform-origin: center;
+            }
+
+            .print-sheet {
+                margin: 0;
+                box-shadow: none;
+            }
+
+            .card-wrap {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .id-card {
                 box-shadow: none;
                 border-radius: 0;
             }
@@ -155,7 +229,7 @@ $mirror         = !empty($mirror);
         <div class="print-sheet">
             <?php foreach ($sheet as $employee): ?>
                 <div class="card-wrap">
-                    <div class="id-card-back">
+                    <div class="id-card">
                         <div class="dekorasi-atas"></div>
 
                         <div class="konten-belakang">
