@@ -103,10 +103,10 @@ $mirror         = !empty($mirror);
             top: 0;
             left: 0;
             width: 100%;
-            height: 12mm;
-            background: linear-gradient(90deg, #00b8f1 0%, #0077cc 55%, #002b9c 100%);
-            clip-path: ellipse(80% 90% at 35% 0%);
+            height: auto;
+            display: block;
             z-index: 0;
+            pointer-events: none;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -143,14 +143,14 @@ $mirror         = !empty($mirror);
 
         .daftar-aturan {
             margin: 0;
-            padding-left: 3mm;
+            padding-left: 3.5mm;
             color: #111111;
         }
 
         .daftar-aturan li {
-            font-size: 4.5pt;
+            font-size: 6.5pt;
             line-height: 1.25;
-            margin-bottom: 1.2mm;
+            margin-bottom: 1.4mm;
         }
 
         .daftar-aturan li strong {
@@ -174,10 +174,10 @@ $mirror         = !empty($mirror);
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 9mm;
-            background: linear-gradient(90deg, #0099dd 0%, #005bb5 55%, #001f7a 100%);
-            clip-path: ellipse(75% 85% at 60% 100%);
+            height: auto;
+            display: block;
             z-index: 0;
+            pointer-events: none;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -230,7 +230,7 @@ $mirror         = !empty($mirror);
             <?php foreach ($sheet as $employee): ?>
                 <div class="card-wrap">
                     <div class="id-card">
-                        <div class="dekorasi-atas"></div>
+                        <img class="dekorasi-atas" src="<?= esc(base_url('assets/images/print-back-atas.png')) ?>" alt="">
 
                         <div class="konten-belakang">
                             <div class="header-aturan">
@@ -254,7 +254,7 @@ $mirror         = !empty($mirror);
                             </div>
                         </div>
 
-                        <div class="dekorasi-bawah"></div>
+                        <img class="dekorasi-bawah" src="<?= esc(base_url('assets/images/print-back-bawah.png')) ?>" alt="">
                     </div>
                 </div>
             <?php endforeach; ?>
