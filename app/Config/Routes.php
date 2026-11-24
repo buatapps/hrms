@@ -132,6 +132,9 @@ $routes->post('employee/export_excel', 'Employee::export_excel');
 $routes->post('employee/search', 'Employee::search');
 $routes->get('employee/printAllCard', 'Employee::printAllCard');
 $routes->get('employee/printCard/(:segment)', 'Employee::printCard/$1');
+$routes->get('employee/idcard', 'Idcard::index');
+$routes->get('employee/idcard/print/(:segment)', 'Idcard::print/$1');
+$routes->get('employee/idcard/print', 'Idcard::print');
 
 $routes->get('employee/schedule', 'Employee::schedule');
 $routes->get('employee/schedule_add/(:segment)', 'Employee::schedule_add/$1');

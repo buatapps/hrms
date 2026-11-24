@@ -35,7 +35,7 @@
 <script src="<?= base_url(); ?>assets/js/pages/demo.apex-pie.js"></script>
 
 <!-- sweetalert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="<?= base_url(); ?>assets/vendor/sweetalert2/sweetalert2.min.js"></script>
 
 <!-- App js -->
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>

@@ -8,6 +8,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class SystemAuthFilter implements FilterInterface
 {
+    public const CACHE_KEY = 'system_auth_check_date';
+
     /**
      * Do whatever processing this filter needs to do.
      * By default it should not return anything during
@@ -38,6 +40,13 @@ class SystemAuthFilter implements FilterInterface
             return;
         }
 
+        $today = date('Y-m-d');
+        $cache = service('cache');
+
+        if ($cache->get(self::CACHE_KEY) === $today) {
+            return;
+        }
+
         $model = new \App\Models\ToolsModel();
         $auth = $model->where('is_active', 1)->first();
 
@@ -47,15 +56,16 @@ class SystemAuthFilter implements FilterInterface
 
         $data = json_decode(base64_decode($auth['auth_key']), true);
 
-        if (!$data) {
+        if (!$data || !isset($data['auth_date'])) {
             return redirect()->to('/tools/auth-key');
         }
-
-        $today = date('Y-m-d');
 
         if ($today > $data['auth_date']) {
             return redirect()->to('/tools/auth-key');
         }
+
+        $ttl = strtotime('tomorrow') - time();
+        $cache->save(self::CACHE_KEY, $today, $ttl > 0 ? $ttl : 86400);
     }
 
     /**

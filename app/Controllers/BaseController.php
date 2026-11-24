@@ -9,91 +9,83 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-//Model
-use App\Models\DashboardModel;
-use App\Models\GuestModel;
-use App\Models\UserModel;
-use App\Models\CompanyModel;
-use App\Models\SectionModel;
-use App\Models\PositionModel;
-use App\Models\EducationModel;
-use App\Models\EmployeeStatusModel;
-use App\Models\GenderModel;
-use App\Models\ReligionModel;
-use App\Models\MarriageStatusModel;
-use App\Models\EmployeeModel;
-use App\Models\BankModel;
-use App\Models\UniformSizeModel;
-use App\Models\ShoesSizeModel;
-use App\Models\WelcomeBoardModel;
-use App\Models\DivisionModel;
-use App\Models\PlantModel;
-use App\Models\EmployeeGroupModel;
-use App\Models\TaxStatusModel;
-use App\Models\DependentModel;
-use App\Models\BloodTypeModel;
-use App\Models\ProductSynchronizationModel;
-use App\Models\AttendanceMachineModel;
-use App\Models\AttendanceModel;
-use App\Models\ShiftModel;
-use App\Models\WorkingHoursModel;
-use App\Models\WorkingDaysModel;
-use App\Models\EmployeeScheduleModel;
-use App\Models\EmployeeLateModel;
-use App\Models\CountFoodModel;
-use App\Models\AbsentTypeModel;
-use App\Models\StnkModel;
-use App\Models\SimModel;
-use App\Models\ContractModel;
-use App\Models\AbsentModel;
-use App\Models\OvertimeModel;
-use App\Models\TicketModel;
-use App\Models\TicketStatusModel;
-use App\Models\TicketCategoryModel;
-use App\Models\HardwareModel;
-use App\Models\HardwareCategoryModel;
-use App\Models\HardwareBrandModel;
-use App\Models\SoftwareModel;
-use App\Models\NetworkModel;
-use App\Models\ResignModel;
-use App\Models\OvertimeHeaderModel;
-use App\Models\OvertimeDetailModel;
-use App\Models\InventoryCategoryModel;
-use App\Models\InventoryItemsModel;
-use App\Models\InventoryTransactionsInModel;
-use App\Models\InventorySnapshotModel;
-use App\Models\InventoryTransactionOutTypeModel;
-use App\Models\InventoryTransactionsOutModel;
-use App\Models\InventoryStockOpnameHeaderModel;
-use App\Models\InventoryStockOpnameModel;
-use App\Models\AuthGroupsModel;
-use App\Models\ContractTypesModel;
-use App\Models\ContractStatusesModel;
-use App\Models\EmployeeUploadsModel;
-use App\Models\LogHistoryModel;
-use App\Models\LogHistoryAbsentModel;
-use App\Models\LockerModel;
-use App\Models\LockerHistoryModel;
-use App\Models\OvertimesModel;
-use App\Models\OvertimeItemsModel;
-use App\Models\OvertimeCategoriesModel;
-use App\Models\OvertimeApprovalsModel;
-use App\Models\OvertimeApprovalModel;
-use App\Models\SertifikatModel;
-use App\Models\TipeSertifikatModel;
-use App\Models\JamIstirahatModel;
-use App\Models\DigimanVideoModel;
-
-
 /**
  * Class BaseController
  *
- * BaseController provides a convenient place for loading components
- * and performing functions that are needed by all your controllers.
- * Extend this class in any new controllers:
- *     class Home extends BaseController
- *
- * For security be sure to declare any new methods as protected or private.
+ * @property \App\Models\AbsentModel $AbsentModel
+ * @property \App\Models\AbsentTypeModel $AbsentTypeModel
+ * @property \App\Models\AttendanceMachineModel $AttendanceMachineModel
+ * @property \App\Models\AttendanceModel $AttendanceModel
+ * @property \App\Models\AuthGroupsModel $AuthGroupsModel
+ * @property \App\Models\BankModel $BankModel
+ * @property \App\Models\BloodTypeModel $BloodTypeModel
+ * @property \App\Models\CompanyModel $CompanyModel
+ * @property \App\Models\ContractModel $ContractModel
+ * @property \App\Models\ContractStatusesModel $ContractStatusesModel
+ * @property \App\Models\ContractTypesModel $ContractTypesModel
+ * @property \App\Models\CountFoodModel $CountFoodModel
+ * @property \App\Models\DashboardModel $DashboardModel
+ * @property \App\Models\DependentModel $DependentModel
+ * @property \App\Models\DigimanVideoModel $DigimanVideoModel
+ * @property \App\Models\DivisionModel $DivisionModel
+ * @property \App\Models\EducationModel $EducationModel
+ * @property \App\Models\EmployeeGroupModel $EmployeeGroupModel
+ * @property \App\Models\EmployeeLateModel $EmployeeLateModel
+ * @property \App\Models\EmployeeModel $EmployeeModel
+ * @property \App\Models\EmployeeScheduleModel $EmployeeScheduleModel
+ * @property \App\Models\EmployeeStatusModel $EmployeeStatusModel
+ * @property \App\Models\EmployeeUploadsModel $EmployeeUploadsModel
+ * @property \App\Models\GenderModel $GenderModel
+ * @property \App\Models\GuestModel $GuestModel
+ * @property \App\Models\HardwareBrandModel $HardwareBrandModel
+ * @property \App\Models\HardwareCategoryModel $HardwareCategoryModel
+ * @property \App\Models\HardwareModel $HardwareModel
+ * @property \App\Models\IdcardModel $IdcardModel
+ * @property \App\Models\InventoryCategoryModel $InventoryCategoryModel
+ * @property \App\Models\InventoryItemsModel $InventoryItemsModel
+ * @property \App\Models\InventorySnapshotModel $InventorySnapshotModel
+ * @property \App\Models\InventoryStockOpnameHeaderModel $InventoryStockOpnameHeaderModel
+ * @property \App\Models\InventoryStockOpnameModel $InventoryStockOpnameModel
+ * @property \App\Models\InventoryTransactionOutTypeModel $InventoryTransactionOutTypeModel
+ * @property \App\Models\InventoryTransactionsInModel $InventoryTransactionsInModel
+ * @property \App\Models\InventoryTransactionsOutModel $InventoryTransactionsOutModel
+ * @property \App\Models\JamIstirahatModel $JamIstirahatModel
+ * @property \App\Models\LockerHistoryModel $LockerHistoryModel
+ * @property \App\Models\LockerModel $LockerModel
+ * @property \App\Models\LogHistoryAbsentModel $LogHistoryAbsentModel
+ * @property \App\Models\LogHistoryModel $LogHistoryModel
+ * @property \App\Models\MarriageStatusModel $MarriageStatusModel
+ * @property \App\Models\NetworkModel $NetworkModel
+ * @property \App\Models\OvertimeApprovalModel $OvertimeApprovalModel
+ * @property \App\Models\OvertimeApprovalsModel $OvertimeApprovalsModel
+ * @property \App\Models\OvertimeCategoriesModel $OvertimeCategoriesModel
+ * @property \App\Models\OvertimeDetailModel $OvertimeDetailModel
+ * @property \App\Models\OvertimeHeaderModel $OvertimeHeaderModel
+ * @property \App\Models\OvertimeItemsModel $OvertimeItemsModel
+ * @property \App\Models\OvertimeModel $OvertimeModel
+ * @property \App\Models\OvertimesModel $OvertimesModel
+ * @property \App\Models\PlantModel $PlantModel
+ * @property \App\Models\PositionModel $PositionModel
+ * @property \App\Models\ProductSynchronizationModel $ProductSynchronizationModel
+ * @property \App\Models\ReligionModel $ReligionModel
+ * @property \App\Models\ResignModel $ResignModel
+ * @property \App\Models\SectionModel $SectionModel
+ * @property \App\Models\SertifikatModel $SertifikatModel
+ * @property \App\Models\ShiftModel $ShiftModel
+ * @property \App\Models\ShoesSizeModel $ShoesSizeModel
+ * @property \App\Models\SimModel $SimModel
+ * @property \App\Models\SoftwareModel $SoftwareModel
+ * @property \App\Models\StnkModel $StnkModel
+ * @property \App\Models\TaxStatusModel $TaxStatusModel
+ * @property \App\Models\TipeSertifikatModel $TipeSertifikatModel
+ * @property \App\Models\TicketCategoryModel $TicketCategoryModel
+ * @property \App\Models\TicketModel $TicketModel
+ * @property \App\Models\TicketStatusModel $TicketStatusModel
+ * @property \App\Models\UniformSizeModel $UniformSizeModel
+ * @property \App\Models\UserModel $UserModel
+ * @property \App\Models\WelcomeBoardModel $WelcomeBoardModel
+ * @property \App\Models\WorkingDaysModel $WorkingDaysModel
+ * @property \App\Models\WorkingHoursModel $WorkingHoursModel
  */
 abstract class BaseController extends Controller
 {
@@ -119,91 +111,117 @@ abstract class BaseController extends Controller
      */
     // protected $session;
 
+    private const MODELS = [
+        'DashboardModel',
+        'GuestModel',
+        'CompanyModel',
+        'UserModel',
+        'SectionModel',
+        'PositionModel',
+        'EmployeeModel',
+        'EducationModel',
+        'EmployeeStatusModel',
+        'GenderModel',
+        'ReligionModel',
+        'MarriageStatusModel',
+        'BankModel',
+        'UniformSizeModel',
+        'ShoesSizeModel',
+        'WelcomeBoardModel',
+        'DivisionModel',
+        'PlantModel',
+        'EmployeeGroupModel',
+        'TaxStatusModel',
+        'DependentModel',
+        'BloodTypeModel',
+        'ProductSynchronizationModel',
+        'AttendanceMachineModel',
+        'AttendanceModel',
+        'ShiftModel',
+        'WorkingHoursModel',
+        'WorkingDaysModel',
+        'EmployeeScheduleModel',
+        'EmployeeLateModel',
+        'CountFoodModel',
+        'AbsentTypeModel',
+        'StnkModel',
+        'SimModel',
+        'ContractModel',
+        'AbsentModel',
+        'OvertimeModel',
+        'TicketModel',
+        'TicketStatusModel',
+        'TicketCategoryModel',
+        'HardwareModel',
+        'HardwareCategoryModel',
+        'HardwareBrandModel',
+        'SoftwareModel',
+        'NetworkModel',
+        'ResignModel',
+        'OvertimeHeaderModel',
+        'OvertimeDetailModel',
+        'InventoryCategoryModel',
+        'InventoryItemsModel',
+        'InventoryTransactionsInModel',
+        'InventorySnapshotModel',
+        'InventoryTransactionOutTypeModel',
+        'InventoryTransactionsOutModel',
+        'InventoryStockOpnameHeaderModel',
+        'InventoryStockOpnameModel',
+        'AuthGroupsModel',
+        'ContractTypesModel',
+        'ContractStatusesModel',
+        'EmployeeUploadsModel',
+        'LogHistoryModel',
+        'LogHistoryAbsentModel',
+        'LockerModel',
+        'LockerHistoryModel',
+        'OvertimesModel',
+        'OvertimeItemsModel',
+        'OvertimeCategoriesModel',
+        'OvertimeApprovalsModel',
+        'OvertimeApprovalModel',
+        'SertifikatModel',
+        'TipeSertifikatModel',
+        'JamIstirahatModel',
+        'DigimanVideoModel',
+        'IdcardModel',
+    ];
+
+    private array $modelInstances = [];
+
+    public function __get(string $name)
+    {
+        if (isset($this->modelInstances[$name])) {
+            return $this->modelInstances[$name];
+        }
+
+        if (! in_array($name, self::MODELS, true)) {
+            throw new \RuntimeException('Unknown model property: ' . $name);
+        }
+
+        $class = '\\App\\Models\\' . $name;
+
+        if (! class_exists($class)) {
+            throw new \RuntimeException('Model class not found: ' . $class);
+        }
+
+        return $this->modelInstances[$name] = new $class();
+    }
+
+    public function __isset(string $name): bool
+    {
+        return isset($this->modelInstances[$name]);
+    }
+
     /**
      * @return void
      */
-    protected $DashboardModel, $GuestModel, $CompanyModel, $UserModel, $SectionModel, $PositionModel, $EmployeeModel, $EducationModel, $EmployeeStatusModel, $GenderModel, $ReligionModel, $MarriageStatusModel, $BankModel, $UniformSizeModel, $ShoesSizeModel, $WelcomeBoardModel, $DivisionModel, $PlantModel, $EmployeeGroupModel, $TaxStatusModel, $DependentModel, $BloodTypeModel, $ProductSynchronizationModel, $AttendanceMachineModel, $AttendanceModel, $ShiftModel, $WorkingHoursModel, $WorkingDaysModel, $EmployeeScheduleModel, $EmployeeLateModel, $CountFoodModel, $AbsentTypeModel, $StnkModel, $SimModel, $ContractModel, $AbsentModel, $OvertimeModel, $TicketModel, $TicketStatusModel, $TicketCategoryModel, $HardwareModel, $HardwareCategoryModel, $HardwareBrandModel, $SoftwareModel, $NetworkModel, $ResignModel, $OvertimeHeaderModel, $OvertimeDetailModel, $InventoryCategoryModel, $InventoryItemsModel, $InventoryTransactionsInModel, $InventorySnapshotModel, $InventoryTransactionOutTypeModel, $InventoryTransactionsOutModel, $InventoryStockOpnameHeaderModel, $InventoryStockOpnameModel, $AuthGroupsModel, $ContractTypesModel, $ContractStatusesModel, $EmployeeUploadsModel, $LogHistoryModel, $LogHistoryAbsentModel, $LockerModel, $LockerHistoryModel, $OvertimesModel, $OvertimeItemsModel, $OvertimeCategoriesModel, $OvertimeApprovalsModel, $OvertimeApprovalModel, $SertifikatModel, $TipeSertifikatModel, $JamIstirahatModel, $DigimanVideoModel;
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
-
-        // E.g.: $this->session = service('session');
         session();
-        $this->DashboardModel = new DashboardModel();
-        $this->GuestModel = new GuestModel();
-        $this->UserModel = new UserModel();
-        $this->CompanyModel = new CompanyModel();
-        $this->SectionModel = new SectionModel();
-        $this->PositionModel = new PositionModel();
-        $this->EducationModel = new EducationModel();
-        $this->EmployeeStatusModel = new EmployeeStatusModel();
-        $this->GenderModel = new GenderModel();
-        $this->ReligionModel = new ReligionModel();
-        $this->MarriageStatusModel = new MarriageStatusModel();
-        $this->EmployeeModel = new EmployeeModel();
-        $this->BankModel = new BankModel();
-        $this->UniformSizeModel = new UniformSizeModel();
-        $this->ShoesSizeModel = new ShoesSizeModel();
-        $this->WelcomeBoardModel = new WelcomeBoardModel();
-        $this->DivisionModel = new DivisionModel();
-        $this->PlantModel = new PlantModel();
-        $this->EmployeeGroupModel = new EmployeeGroupModel();
-        $this->TaxStatusModel = new TaxStatusModel();
-        $this->DependentModel = new DependentModel();
-        $this->BloodTypeModel = new BloodTypeModel();
-        $this->ProductSynchronizationModel = new ProductSynchronizationModel();
-        $this->AttendanceMachineModel = new AttendanceMachineModel();
-        $this->AttendanceModel = new AttendanceModel();
-        $this->ShiftModel = new ShiftModel();
-        $this->WorkingHoursModel = new WorkingHoursModel();
-        $this->WorkingDaysModel = new WorkingDaysModel();
-        $this->EmployeeScheduleModel = new EmployeeScheduleModel();
-        $this->EmployeeLateModel = new EmployeeLateModel();
-        $this->CountFoodModel = new CountFoodModel();
-        $this->AbsentTypeModel = new AbsentTypeModel();
-        $this->StnkModel = new StnkModel();
-        $this->SimModel = new SimModel();
-        $this->ContractModel = new ContractModel();
-        $this->AbsentModel = new AbsentModel();
-        $this->OvertimeModel = new OvertimeModel();
-        $this->TicketModel = new TicketModel();
-        $this->TicketStatusModel = new TicketStatusModel();
-        $this->TicketCategoryModel = new TicketCategoryModel();
-        $this->HardwareModel = new HardwareModel();
-        $this->HardwareCategoryModel = new HardwareCategoryModel();
-        $this->HardwareBrandModel = new HardwareBrandModel();
-        $this->SoftwareModel = new SoftwareModel();
-        $this->NetworkModel = new NetworkModel();
-        $this->ResignModel = new ResignModel();
-        $this->OvertimeHeaderModel = new OvertimeHeaderModel();
-        $this->OvertimeDetailModel = new OvertimeDetailModel();
-        $this->InventoryCategoryModel = new InventoryCategoryModel();
-        $this->InventoryItemsModel = new InventoryItemsModel();
-        $this->InventoryTransactionsInModel = new InventoryTransactionsInModel();
-        $this->InventorySnapshotModel = new InventorySnapshotModel();
-        $this->InventoryTransactionOutTypeModel = new InventoryTransactionOutTypeModel();
-        $this->InventoryTransactionsOutModel = new InventoryTransactionsOutModel();
-        $this->InventoryStockOpnameHeaderModel = new InventoryStockOpnameHeaderModel();
-        $this->InventoryStockOpnameModel = new InventoryStockOpnameModel();
-        $this->AuthGroupsModel = new AuthGroupsModel();
-        $this->ContractTypesModel = new ContractTypesModel();
-        $this->ContractStatusesModel = new ContractStatusesModel();
-        $this->EmployeeUploadsModel = new EmployeeUploadsModel();
-        $this->LogHistoryModel = new LogHistoryModel();
-        $this->LogHistoryAbsentModel = new LogHistoryAbsentModel();
-        $this->LockerModel = new LockerModel();
-        $this->LockerHistoryModel = new LockerHistoryModel();
-        $this->OvertimesModel = new OvertimesModel();
-        $this->OvertimeItemsModel = new OvertimeItemsModel();
-        $this->OvertimeCategoriesModel = new OvertimeCategoriesModel();
-        $this->OvertimeApprovalsModel = new OvertimeApprovalsModel();
-        $this->OvertimeApprovalModel = new OvertimeApprovalModel();
-        $this->SertifikatModel = new SertifikatModel();
-        $this->TipeSertifikatModel = new TipeSertifikatModel();
-        $this->JamIstirahatModel = new JamIstirahatModel();
-        $this->DigimanVideoModel = new DigimanVideoModel();
     }
 }

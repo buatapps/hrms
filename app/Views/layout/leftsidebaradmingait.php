@@ -74,6 +74,9 @@
                 </a>
                 <div class="collapse" id="sidebarGeneralAffair">
                     <ul class="side-nav-second-level">
+                        <li>
+                            <a href="<?= base_url('employee/idcard'); ?>">ID Card</a>
+                        </li>
                         <li class="side-nav-item">
                             <a data-bs-toggle="collapse" href="#sidebarInventory" aria-expanded="false" aria-controls="sidebarInventory">
                                 <span> Inventory </span>
