@@ -245,7 +245,12 @@ $mirror         = !empty($mirror);
                 $words    = preg_split('/\s+/', trim($employee['name']));
                 $initials = strtoupper(substr($words[0] ?? '?', 0, 1) . substr($words[1] ?? '', 0, 1));
                 $foto     = !empty($employee['picture']) ? base_url('employee_picture/' . $employee['picture']) : '';
-                $qrData   = $employee['employee_id'] . '.' . $employee['name'] . '.' . $employee['division'];
+                $qrData   = implode('.', [
+                    $employee['employee_id'],
+                    $employee['name'],
+                    $employee['division'],
+                    $employee['position'] ?? '-',
+                ]);
                 ?>
                 <div class="card-wrap">
                     <div class="id-card">

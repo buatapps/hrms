@@ -129,6 +129,8 @@ $routes->get('employee/employee_division_edit/(:segment)', 'Employee::employee_d
 $routes->post('employee/employee_division_update', 'Employee::employee_division_update');
 
 $routes->post('employee/export_excel', 'Employee::export_excel');
+$routes->get('employee/import_template', 'Employee::import_template');
+$routes->post('employee/import_excel', 'Employee::import_excel');
 $routes->post('employee/search', 'Employee::search');
 $routes->get('employee/printAllCard', 'Employee::printAllCard');
 $routes->get('employee/printCard/(:segment)', 'Employee::printCard/$1');

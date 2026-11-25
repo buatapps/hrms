@@ -145,6 +145,7 @@ class EmployeeModel extends Model
         $builder = $this->db->table('data_employee e');
         $builder->select('
         e.*, c.contract_types_id AS latest_contract_type_id, ct.name AS latest_contract_types_name');
+        $builder->where('e.deleted_at', null);
 
         // Filter employee_status
         if ($employee_status_id != null) {
@@ -280,15 +281,24 @@ class EmployeeModel extends Model
 
 
 
-    public function employeeExport($gender_id, $employee_status_id, $division_id, $company_id)
+    public function employeeExport($gender_id, $employee_status_id, $division_id, $plant_id = null, $employee_group_id = null, $company_id = null)
     {
         $builder = $this->db->table('employee_details');
         $builder->select('*');
+        $builder->where('deleted_at', null);
         if ($gender_id != null) {
             $builder->where('gender_id', $gender_id);
         }
         if ($employee_status_id != null) {
             $builder->where('employee_status_id', $employee_status_id);
+        } else {
+            $builder->whereIn('employee_status_id', [1, 2]);
+        }
+        if ($plant_id != null) {
+            $builder->where('plant_id', $plant_id);
+        }
+        if ($employee_group_id != null) {
+            $builder->where('employee_group_id', $employee_group_id);
         }
         if ($division_id != null) {
             $builder->where('division_id', $division_id);

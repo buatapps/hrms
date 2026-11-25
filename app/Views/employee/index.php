@@ -102,16 +102,12 @@
                     <div class="row mb-3">
                         <div class="col-xl-2 col-sm-12">
                             <h5>&nbsp;</h5>
-                            <div class="d-grid">
-                                <a href="<?= base_url('employee/printAllCard'); ?>" class="btn btn-primary" target="_blank">Print All Card</a>
-                            </div>
-                        </div>
-                        <div class="col-xl-2 col-sm-12">
-                            <h5>&nbsp;</h5>
-                            <form action="<?= base_url('employee/export_excel'); ?>" method="post">
+                            <form action="<?= base_url('employee/export_excel'); ?>" method="post" id="export-employee-form">
                                 <input type="hidden" class="form-control" name="gender_id" value="<?= $gender_id; ?>">
                                 <input type="hidden" class="form-control" name="employee_status_id" value="<?= $employee_status_id; ?>">
                                 <input type="hidden" class="form-control" name="division_id" value="<?= $division_id; ?>">
+                                <input type="hidden" class="form-control" name="plant_id" value="<?= $plant_id; ?>">
+                                <input type="hidden" class="form-control" name="employee_group_id" value="<?= $employee_group_id; ?>">
                                 <input type="hidden" class="form-control" name="company_id" value="<?= $company_id; ?>">
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-success" id="btn-export">
@@ -121,10 +117,20 @@
                             </form>
 
                         </div><!-- end col-->
-                        <div class="col-xl-2 col-sm-12 ms-xl-auto">
+                        <?php if (in_groups(['superadmin', 'admin'])) : ?>
+                            <div class="col-xl-2 col-sm-12">
+                                <h5>&nbsp;</h5>
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-warning text-nowrap" data-bs-toggle="modal" data-bs-target="#importEmployeeModal">
+                                        <i class="mdi mdi-upload"></i> Import Excel
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <div class="col-xl-3 col-sm-12 ms-xl-auto">
                             <h5>&nbsp;</h5>
                             <div class="d-grid">
-                                <a href="<?= base_url('employee/non-aktif'); ?>" class="btn btn-danger"><i class="mdi mdi-account-off"></i> Employee Non-active</a>
+                                <a href="<?= base_url('employee/non-aktif'); ?>" class="btn btn-danger text-nowrap"><i class="mdi mdi-account-off"></i> Employee Non-active</a>
                             </div>
                         </div>
                         <div id="loading" style="display: none; margin-top: 1rem;">
@@ -371,6 +377,38 @@
                             </div>
                         </div>
                     <?php endif; ?>
+                    <?php if (session('error')) : ?>
+                        <div class="mt-2">
+                            <div class="alert alert-danger" role="alert">
+                                <i class="ri-close-circle-line me-2"></i>
+                                <?= session('error'); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (session('warning')) : ?>
+                        <div class="mt-2">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="ri-alert-line me-2"></i>
+                                <?= session('warning'); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <?php $importErrors = session()->getFlashdata('error_list'); ?>
+                    <?php if (!empty($importErrors)) : ?>
+                        <div class="mt-2">
+                            <div class="alert alert-danger" role="alert">
+                                <i class="ri-close-circle-line me-2"></i>
+                                <strong>Import:</strong> <?= count($importErrors); ?> baris gagal diproses.
+                                <ul class="mb-0 mt-2">
+                                    <?php foreach ($importErrors as $error) : ?>
+                                        <li>
+                                            <?= esc(($error['row'] ?? 0) > 0 ? 'Baris ' . $error['row'] : 'File') . ': ' . esc($error['message'] ?? ''); ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <!-- <table id="scroll-horizontal-datatable" class="table table-striped w-100 nowrap"> -->
                     <table id="basic-datatable" class="table table-striped dt-responsive nowrap w-100">
                         <thead>
@@ -436,21 +474,154 @@
         </div>
     </div>
 </div>
+<?php if (in_groups(['superadmin', 'admin'])) : ?>
+    <div class="modal fade" id="importEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="importEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="<?= base_url('employee/import_excel'); ?>" method="post" enctype="multipart/form-data">
+                    <?= csrf_field(); ?>
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="importEmployeeModalLabel">Import Excel Employee</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="excel_file" class="form-label">File Excel</label>
+                            <input type="file" class="form-control" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
+                            <div class="form-text">Maksimal 5 MB. Kolom ID wajib ada. Sel kosong dilewati, status tidak diubah.</div>
+                        </div>
+                        <?php
+                        $templateParams = array_filter([
+                            'gender_id'          => $gender_id,
+                            'employee_status_id' => $employee_status_id,
+                            'division_id'        => $division_id,
+                            'plant_id'           => $plant_id,
+                            'employee_group_id'  => $employee_group_id,
+                            'company_id'         => $company_id,
+                        ], function ($value) {
+                            return $value !== null && $value !== '';
+                        });
+
+                        if (in_groups('admin')) {
+                            unset($templateParams['division_id']);
+                        }
+
+                        $templateUrl = base_url('employee/import_template') . ($templateParams ? '?' . http_build_query($templateParams) : '');
+                        ?>
+                        <a href="<?= $templateUrl; ?>" id="btn-template" class="btn btn-link ps-0 <?= $templateParams ? '' : 'disabled'; ?>" data-no-filter="<?= $templateParams ? '0' : '1'; ?>" title="<?= $templateParams ? 'Download template sesuai filter search.' : 'Pilih minimal satu filter search sebelum download template.'; ?>">
+                            <i class="mdi mdi-download"></i> Download template
+                        </a>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 <script>
-    document.getElementById('btn-export').addEventListener('click', function(e) {
+    const btnExport = document.getElementById('btn-export');
+    const btnTemplate = document.getElementById('btn-template');
+    const loadingExport = document.getElementById('loading');
+    const exportForm = document.getElementById('export-employee-form');
+    let isDownloading = false;
+
+    function defaultFileName(label) {
+        return new Date().toISOString().slice(0, 10) + '-' + label + '.xlsx';
+    }
+
+    function setBusy(button, busy) {
+        button.disabled = busy;
+        button.classList.toggle('disabled', busy);
+
+        if (busy) {
+            button.setAttribute('aria-disabled', 'true');
+        } else {
+            button.removeAttribute('aria-disabled');
+        }
+    }
+
+    async function downloadFile(url, options, fallbackFileName) {
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            let message = 'Download gagal: ' + response.status;
+
+            try {
+                const body = await response.json();
+
+                if (body && body.message) {
+                    message = body.message;
+                }
+            } catch (parseError) {
+                console.warn(parseError);
+            }
+
+            throw new Error(message);
+        }
+
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"']+)/i);
+        const fileName = match ? decodeURIComponent(match[1]) : fallbackFileName;
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    }
+
+    async function withLoading(button, task, fallbackFileName, errorMessage) {
+        if (isDownloading) {
+            return;
+        }
+
+        isDownloading = true;
+        loadingExport.style.display = 'block';
+        setBusy(button, true);
+
+        try {
+            await task(fallbackFileName);
+        } catch (error) {
+            console.error(error);
+            alert(error.message || errorMessage);
+        } finally {
+            loadingExport.style.display = 'none';
+            setBusy(button, false);
+            isDownloading = false;
+        }
+    }
+
+    btnExport.addEventListener('click', function(e) {
         e.preventDefault();
 
-        // Tampilkan spinner
-        document.getElementById('loading').style.display = 'block';
-
-        // Ambil form terdekat
-        const form = this.closest('form');
-
-        // Kasih jeda biar loading kelihatan
-        setTimeout(function() {
-            form.submit(); // Submit form POST seperti biasa
-        }, 500); // 0.5 detik cukup biar loading muncul
+        withLoading(btnExport, async function(fallbackFileName) {
+            await downloadFile(exportForm.action, {
+                method: 'POST',
+                body: new FormData(exportForm),
+            }, fallbackFileName);
+        }, defaultFileName('Data Employee'), 'Export gagal. Silakan coba lagi.');
     });
+
+    if (btnTemplate) {
+        btnTemplate.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            if (btnTemplate.dataset.noFilter === '1') {
+                alert('Pilih minimal satu filter search sebelum download template.');
+                return;
+            }
+
+            withLoading(btnTemplate, async function(fallbackFileName) {
+                await downloadFile(btnTemplate.href, { method: 'GET' }, fallbackFileName);
+            }, defaultFileName('Template Import Employee'), 'Download template gagal. Silakan coba lagi.');
+        });
+    }
 </script>
 <!-- container -->
 <?= $this->endSection() ?>

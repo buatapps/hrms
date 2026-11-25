@@ -3,11 +3,14 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Libraries\EmployeeExcelImport;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use DateTime;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Throwable;
 
 class Employee extends BaseController
 {
@@ -706,11 +709,13 @@ class Employee extends BaseController
     {
         $gender_id = $this->request->getVar('gender_id');
         $employee_status_id = $this->request->getVar('employee_status_id');
-        $division_id = $this->request->getVar('division_id');
+        $division_id = resolveDivisionFilter($this->request->getVar('division_id'));
+        $plant_id = $this->request->getVar('plant_id');
+        $employee_group_id = $this->request->getVar('employee_group_id');
         $company_id = $this->request->getVar('company_id');
 
         // $list_data = $this->EmployeeModel->employeeDetails();
-        $list_data = $this->EmployeeModel->employeeExport($gender_id, $employee_status_id, $division_id, $company_id);
+        $list_data = $this->EmployeeModel->employeeExport($gender_id, $employee_status_id, $division_id, $plant_id, $employee_group_id, $company_id);
 
         $spreadsheet = new Spreadsheet();
 
@@ -806,7 +811,7 @@ class Employee extends BaseController
                 ->setCellValue('H' . $column, $row->employee_group)
                 ->setCellValue('I' . $column, $row->product_synchronization)
                 ->setCellValue('J' . $column, $row->date_of_entry)
-                ->setCellValue('K' . $column, $umur_)
+                ->setCellValue('K' . $column, $masa_kerja_)
                 ->setCellValue('L' . $column, $row->employee_status)
                 ->setCellValue('M' . $column, $row->working_days)
                 ->setCellValue('N' . $column, $row->bank)
@@ -826,7 +831,7 @@ class Employee extends BaseController
                 ->setCellValue('AB' . $column, $row->gender)
                 ->setCellValue('AC' . $column, $row->place_of_birth)
                 ->setCellValue('AD' . $column, $row->date_of_birth)
-                ->setCellValue('AE' . $column, $masa_kerja_)
+                ->setCellValue('AE' . $column, $umur_)
                 ->setCellValue('AF' . $column, $row->blood_type)
                 ->setCellValue('AG' . $column, $row->address)
                 ->setCellValue('AH' . $column, $row->phone_number)
@@ -847,7 +852,7 @@ class Employee extends BaseController
                 ->setCellValue('AW' . $column, $row->villages)
                 ->setCellValue('AX' . $column, $row->couple)
                 ->setCellValue('AY' . $column, $row->couple_date_of_birth)
-                ->setCellValue('AX' . $column, $row->child_1)
+                ->setCellValue('AZ' . $column, $row->child_1)
                 ->setCellValue('BA' . $column, $row->child_1_birthday)
                 ->setCellValue('BB' . $column, $row->child_1_gender)
                 ->setCellValue('BC' . $column, $row->child_2)
@@ -871,6 +876,426 @@ class Employee extends BaseController
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');
+    }
+
+    public function import_template()
+    {
+        if (!in_groups(['superadmin', 'admin'])) {
+            return redirect()->to(base_url('employee'))->with('error', 'Akses import tidak diizinkan.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Import');
+
+        $gender_id = $this->request->getVar('gender_id');
+        $employee_status_id = $this->request->getVar('employee_status_id');
+        $requestDivisionId = $this->request->getVar('division_id');
+        $division_id = resolveDivisionFilter($requestDivisionId);
+        $plant_id = $this->request->getVar('plant_id');
+        $employee_group_id = $this->request->getVar('employee_group_id');
+        $company_id = $this->request->getVar('company_id');
+
+        $hasFilter = false;
+
+        foreach ([$gender_id, $employee_status_id, $requestDivisionId, $plant_id, $employee_group_id, $company_id] as $filter) {
+            if ($filter !== null && $filter !== '') {
+                $hasFilter = true;
+                break;
+            }
+        }
+
+        if (!$hasFilter) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'message' => 'Pilih minimal satu filter search sebelum download template.',
+            ]);
+        }
+
+        $headers = $this->importTemplateHeaders();
+        $list_data = $this->EmployeeModel->employeeExport($gender_id, $employee_status_id, $division_id, $plant_id, $employee_group_id, $company_id);
+
+        foreach ($headers as $index => $header) {
+            $column = Coordinate::stringFromColumnIndex($index + 1);
+            $sheet->setCellValue($column . '1', $header);
+            $sheet->getColumnDimension($column)->setWidth(max(14, min(28, strlen($header) + 4)));
+        }
+
+        foreach ($list_data as $rowIndex => $row) {
+            foreach ($this->importTemplateValues($row) as $index => $value) {
+                $column = Coordinate::stringFromColumnIndex($index + 1);
+                $sheet->setCellValue($column . ($rowIndex + 2), $value);
+            }
+        }
+
+        $lastColumn = Coordinate::stringFromColumnIndex(count($headers));
+        $lastRow = count($list_data) + 1;
+        $sheet->getStyle('1:1')->getFont()->setBold(true);
+        $sheet->setAutoFilter('A1:' . $lastColumn . $lastRow);
+        $sheet->freezePane('A2');
+
+        $guide = $spreadsheet->createSheet();
+        $guide->setTitle('Petunjuk');
+        $guide->setCellValue('A1', 'Petunjuk Import Employee');
+        $guide->getStyle('A1')->getFont()->setBold(true);
+        $guide->getColumnDimension('A')->setWidth(110);
+
+        $notes = [
+            'Template ini berisi data employee sesuai filter search yang aktif; ubah hanya kolom yang ingin diperbarui.',
+            'Kolom ID wajib diisi dengan ID employee dari database dan jangan diubah.',
+            'Sel yang dikosongkan akan dilewati, nilai lama tidak berubah.',
+            'Kolom Year of service, Age, dan Employee Status tidak diproses.',
+            'Nama Company, Division, Position, Plant, Group, Bank, Tax Status, Gender, Education, Marriage Status, dan wilayah harus sesuai dengan data master.',
+            'Maksimal ' . EmployeeExcelImport::MAX_ROWS . ' baris per file.',
+        ];
+
+        foreach ($notes as $index => $note) {
+            $guide->setCellValue('A' . ($index + 3), ($index + 1) . '. ' . $note);
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $fileName = date('Y-m-d') . '-Template Import Employee.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function import_excel()
+    {
+        if (!in_groups(['superadmin', 'admin'])) {
+            return redirect()->to(base_url('employee'))->with('error', 'Akses import tidak diizinkan.');
+        }
+
+        $file = $this->request->getFile('excel_file');
+
+        if ($file === null || !$file->isValid() || $file->hasMoved() || $file->getError() !== UPLOAD_ERR_OK) {
+            return redirect()->to(base_url('employee'))->with('error', 'File Excel wajib diunggah.');
+        }
+
+        if (!in_array(strtolower($file->getExtension()), ['xlsx', 'xls', 'csv'], true)) {
+            return redirect()->to(base_url('employee'))->with('error', 'Format file harus xlsx, xls, atau csv.');
+        }
+
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            return redirect()->to(base_url('employee'))->with('error', 'Ukuran file maksimal 5 MB.');
+        }
+
+        $folder = WRITEPATH . 'imports';
+
+        if (!is_dir($folder) && !@mkdir($folder, 0755, true) && !is_dir($folder)) {
+            return redirect()->to(base_url('employee'))->with('error', 'Folder import tidak dapat dibuat.');
+        }
+
+        if (!is_writable($folder)) {
+            return redirect()->to(base_url('employee'))->with('error', 'Folder import tidak dapat ditulis.');
+        }
+
+        $errors = [];
+        $success = 0;
+        $movedPath = null;
+
+        try {
+            $moved = $file->move($folder, $file->getRandomName());
+
+            if ($moved !== true) {
+                return redirect()->to(base_url('employee'))->with('error', 'Gagal menyimpan file upload.');
+            }
+
+            $movedPath = rtrim($folder, '/\\') . DIRECTORY_SEPARATOR . $file->getName();
+            $importer = new EmployeeExcelImport($this->buildImportLookups());
+            $parsed = $importer->parse($movedPath);
+            $errors = $parsed['errors'];
+
+            foreach ($parsed['rows'] as $item) {
+                $employee = $this->EmployeeModel->find($item['id']);
+
+                if ($employee === null) {
+                    $errors[] = [
+                        'row'     => $item['row'],
+                        'message' => 'ID ' . $item['id'] . ' tidak ditemukan.',
+                    ];
+                    continue;
+                }
+
+                $employee = (array) $employee;
+
+                if (!in_groups('superadmin') && (int) ($employee['division_id'] ?? 0) !== (int) user()->division_id) {
+                    $errors[] = [
+                        'row'     => $item['row'],
+                        'message' => 'ID ' . $item['id'] . ' berada di luar divisi Anda.',
+                    ];
+                    continue;
+                }
+
+                $data = $item['data'];
+
+                if ($data === []) {
+                    $errors[] = [
+                        'row'     => $item['row'],
+                        'message' => 'Tidak ada kolom yang diisi.',
+                    ];
+                    continue;
+                }
+
+                $oldPlantGroup = [
+                    'plant_id'          => $employee['plant_id'] ?? null,
+                    'employee_group_id' => $employee['employee_group_id'] ?? null,
+                ];
+
+                $newPlantGroup = [
+                    'plant_id'          => $data['plant_id'] ?? $oldPlantGroup['plant_id'],
+                    'employee_group_id' => $data['employee_group_id'] ?? $oldPlantGroup['employee_group_id'],
+                ];
+
+                $this->EmployeeModel->transStart();
+
+                try {
+                    $this->EmployeeModel->update($item['id'], $data);
+                    $this->logPlantGroup($item['id'], $oldPlantGroup, $newPlantGroup);
+                    $this->EmployeeModel->transComplete();
+
+                    if (! $this->EmployeeModel->transStatus()) {
+                        $errors[] = [
+                            'row'     => $item['row'],
+                            'message' => 'Gagal menyimpan data.',
+                        ];
+                        continue;
+                    }
+
+                    $success++;
+                } catch (Throwable $e) {
+                    $this->EmployeeModel->transRollback();
+                    $errors[] = [
+                        'row'     => $item['row'],
+                        'message' => 'Gagal menyimpan data.',
+                    ];
+                }
+            }
+        } catch (Throwable $e) {
+            $errors[] = [
+                'row'     => 0,
+                'message' => 'File Excel tidak dapat diproses.',
+            ];
+        } finally {
+            if ($movedPath !== null && is_file($movedPath)) {
+                @unlink($movedPath);
+            }
+        }
+
+        if ($success > 0) {
+            session()->setFlashdata('success', $success . ' baris berhasil di-update.');
+        }
+
+        if ($errors !== []) {
+            session()->setFlashdata('error_list', $errors);
+        }
+
+        if ($success === 0 && $errors === []) {
+            session()->setFlashdata('warning', 'Tidak ada baris untuk di-update.');
+        }
+
+        return redirect()->to(base_url('employee'));
+    }
+
+    private function buildImportLookups(): array
+    {
+        $sources = [
+            'company_id'         => $this->CompanyModel->findAll(),
+            'division_id'        => $this->DivisionModel->findAll(),
+            'position_id'        => $this->PositionModel->findAll(),
+            'plant_id'           => $this->PlantModel->findAll(),
+            'employee_group_id'  => $this->EmployeeGroupModel->findAll(),
+            'bank_id'            => $this->BankModel->findAll(),
+            'tax_status_id'      => $this->TaxStatusModel->findAll(),
+            'gender_id'          => $this->GenderModel->findAll(),
+            'education_id'       => $this->EducationModel->findAll(),
+            'marriage_status_id' => $this->MarriageStatusModel->findAll(),
+            'provinces_id'       => $this->DependentModel->selectData('provinces'),
+            'regencies_id'       => $this->DependentModel->selectData('regencies'),
+            'districts_id'       => $this->DependentModel->selectData('districts'),
+            'villages_id'        => $this->DependentModel->selectData('villages'),
+        ];
+
+        $lookups = [];
+
+        foreach ($sources as $field => $rows) {
+            $map = [];
+
+            foreach ($rows as $row) {
+                $name = preg_replace('/\s+/', ' ', strtolower(trim((string) $row->name)));
+
+                if ($name === '') {
+                    continue;
+                }
+
+                $map[$name] = (int) $row->id;
+            }
+
+            $lookups[$field] = $map;
+        }
+
+        return $lookups;
+    }
+
+    private function importTemplateValues($row): array
+    {
+        $textFields = [
+            'ID'                           => 'id',
+            'Company'                      => 'company',
+            'Name'                         => 'name',
+            'Employee ID'                  => 'employee_id',
+            'Employee PIN'                 => 'employee_pin',
+            'Division'                     => 'division',
+            'Position'                     => 'position',
+            'Plant'                        => 'plant',
+            'Group'                        => 'employee_group',
+            'Product Synch'                => 'product_synchronization',
+            'Date of Entry'                => 'date_of_entry',
+            'Employee Status'              => 'employee_status',
+            'Working Days'                 => 'working_days',
+            'Bank'                         => 'bank',
+            'Salary'                       => 'salary',
+            'Tax Status'                   => 'tax_status',
+            'Clinic Provider'              => 'clinic_provider',
+            'Hospital Provider'            => 'hospital_provider',
+            'Uniform Size'                 => 'uniform_size',
+            'Shoes Size'                   => 'shoes_size',
+            'Gender'                       => 'gender',
+            'Place of birth'               => 'place_of_birth',
+            'Date of birth'                => 'date_of_birth',
+            'Blood type'                   => 'blood_type',
+            'Address'                      => 'address',
+            'Email'                        => 'email',
+            'Religion'                     => 'religion',
+            'Education'                    => 'education',
+            'Marriage Status'              => 'marriage_status',
+            'Mothers Name'                 => 'mothers_name',
+            'Number of Children'           => 'number_of_children',
+            'Address (KTP)'                => 'address_identity',
+            'RT'                           => 'rt',
+            'RW'                           => 'rw',
+            'Provinces'                    => 'provinces',
+            'Regencies'                    => 'regencies',
+            'Districts'                    => 'districts',
+            'Villages'                     => 'villages',
+            'Husband / Wife Name'          => 'couple',
+            'Husband / Wife date of birth' => 'couple_date_of_birth',
+            '1st Child Name'               => 'child_1',
+            '1st Child birthday'           => 'child_1_birthday',
+            '1st Child gender'             => 'child_1_gender',
+            '2nd Child Name'               => 'child_2',
+            '2nd Child birthday'           => 'child_2_birthday',
+            '2nd Child gender'             => 'child_2_gender',
+            '3rd Child Name'               => 'child_3',
+            '3rd Child birthday'           => 'child_3_birthday',
+            '3rd Child gender'             => 'child_3_gender',
+            'Emregency Calling Name'       => 'emergency_name',
+            'Relathionship'                => 'emergency_relathionship',
+        ];
+
+        $prefixFields = [
+            'Account Number'              => 'account_number',
+            'NPWP'                        => 'npwp_number',
+            'BPJS Ketenagakerjaan'        => 'ketenagakerjaan_number',
+            'BPJS Kesehatan'              => 'kesehatan_number',
+            'Insurance Employee'          => 'insurance_employee',
+            'Insurance Husband / Wife'    => 'insurance_couple',
+            'Insurance Children'          => 'insurance_children',
+            'Phone Number'                => 'phone_number',
+            'Identity Number (KTP)'       => 'identity_number',
+            'Identity Family Number (KK)' => 'identity_family_number',
+            'Contact Number'              => 'emergency_contact',
+        ];
+
+        $values = [];
+
+        foreach ($this->importTemplateHeaders() as $header) {
+            if (array_key_exists($header, $prefixFields)) {
+                $value = $row->{$prefixFields[$header]} ?? null;
+                $values[] = $value === null || $value === '' ? null : "'" . $value;
+                continue;
+            }
+
+            $field = $textFields[$header] ?? null;
+            $values[] = $field === null ? null : ($row->{$field} ?? null);
+        }
+
+        return $values;
+    }
+
+    private function importTemplateHeaders(): array
+    {
+        return [
+            'ID',
+            'Company',
+            'Name',
+            'Employee ID',
+            'Employee PIN',
+            'Division',
+            'Position',
+            'Plant',
+            'Group',
+            'Product Synch',
+            'Date of Entry',
+            'Year of service',
+            'Employee Status',
+            'Working Days',
+            'Bank',
+            'Account Number',
+            'Salary',
+            'NPWP',
+            'Tax Status',
+            'BPJS Ketenagakerjaan',
+            'BPJS Kesehatan',
+            'Clinic Provider',
+            'Hospital Provider',
+            'Insurance Employee',
+            'Insurance Husband / Wife',
+            'Insurance Children',
+            'Uniform Size',
+            'Shoes Size',
+            'Gender',
+            'Place of birth',
+            'Date of birth',
+            'Age',
+            'Blood type',
+            'Address',
+            'Phone Number',
+            'Email',
+            'Identity Number (KTP)',
+            'Identity Family Number (KK)',
+            'Religion',
+            'Education',
+            'Marriage Status',
+            'Mothers Name',
+            'Number of Children',
+            'Address (KTP)',
+            'RT',
+            'RW',
+            'Provinces',
+            'Regencies',
+            'Districts',
+            'Villages',
+            'Husband / Wife Name',
+            'Husband / Wife date of birth',
+            '1st Child Name',
+            '1st Child birthday',
+            '1st Child gender',
+            '2nd Child Name',
+            '2nd Child birthday',
+            '2nd Child gender',
+            '3rd Child Name',
+            '3rd Child birthday',
+            '3rd Child gender',
+            'Emregency Calling Name',
+            'Relathionship',
+            'Contact Number',
+        ];
     }
 
     public function schedule()
