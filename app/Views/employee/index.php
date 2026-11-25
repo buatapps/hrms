@@ -511,6 +511,7 @@
                         <a href="<?= $templateUrl; ?>" id="btn-template" class="btn btn-link ps-0 <?= $templateParams ? '' : 'disabled'; ?>" data-no-filter="<?= $templateParams ? '0' : '1'; ?>" title="<?= $templateParams ? 'Download template sesuai filter search.' : 'Pilih minimal satu filter search sebelum download template.'; ?>">
                             <i class="mdi mdi-download"></i> Download template
                         </a>
+                        <div class="form-text <?= $templateParams ? '' : 'text-danger'; ?>">Minimal ada 1 filter agar bisa download template.</div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
